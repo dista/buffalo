@@ -1,5 +1,5 @@
 var net = require("net");
-var port = 8000;
+var port = 7000;
 var ip = "103.21.136.175"
 
 var device_id = new Buffer([0x22, 0x22, 0x22, 0x22,
@@ -55,6 +55,7 @@ var client = net.connect(port, ip, function(){
     }
 
     client.on('data', function(data){
+        console.log("device" + data.toJSON() + " " + (new Date()));
         if(data[1] == 0x41){
             console.log("device receive control");
             //on_control(data);         
