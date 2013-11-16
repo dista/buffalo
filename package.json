@@ -1,0 +1,10 @@
+{
+    "name": "buffalo",
+    "version": "0.1.0",
+    "dependencies": {
+        "posix": "*",
+        "sqlite3": "*",
+        "emailjs": "*",
+        "mysql": "*"
+    }
+}
