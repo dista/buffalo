@@ -2,7 +2,7 @@ var net = require('net');
 var embed_device = require('./embed_device.js');
 var phone = require('./phone.js');
 var posix = require('posix');
-var port = 9000;
+var port = 7000;
 
 function handleClient(c)
 {

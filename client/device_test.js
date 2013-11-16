@@ -1,6 +1,6 @@
 var net = require("net");
 var util = require("../util.js");
-var port = 9000;
+var port = 7000;
 var posix = require('posix');
 var ip = "103.21.136.175"
 

@@ -6,7 +6,8 @@ var mysql = require("mysql");
 var db = mysql.createConnection({
     host : "localhost",
     user: "buffalo",
-    password: "buffalo"
+    password: "buffalo",
+    database: "buffalo"
 });
 
 var die = function(msg, err){

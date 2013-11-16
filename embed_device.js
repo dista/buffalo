@@ -59,16 +59,20 @@ exports.create_embed_device = function(c) {
             }
         }
 
-        var is_another_logined = function(){
+        var rm_another_logined = function(){
             for(var i = 0; i < embeds.length; i++)
             {
                 if(embeds[i].device_id == self.device_id)
                 {
-                    return true;
+                    if(embeds[i] != self){
+                        print_log("another device already logined, destroy it");
+                        embeds[i].sock.destroy();
+                        embeds.splice(i, 1);
+                    }
+
+                    break;
                 }
             }
-
-            return false;
         }
 
         var handle_protocal_error = function()
@@ -273,12 +277,7 @@ exports.create_embed_device = function(c) {
         var proto_login = function(data, start, msg, len){
             self.device_id = data.toString('ascii', start + 8, start + 8 + 12);
 
-            if(is_another_logined())
-            {
-                write_data(util.buildErr(msg, error_code.DEVICE_LOGINED));
-                handle_data_internal(data, util.getNextMsgPos(start, len));
-                return;
-            }
+            rm_another_logined();
 
             var mac = data.toString('hex', start + 8 + 12, start + 8 + 12 + 6);
 
