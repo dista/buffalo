@@ -38,6 +38,7 @@ var db = new sqlite3.Database(db_file, function(err){
                 db.run('CREATE UNIQUE INDEX sid_index ON time(sid, device_id)');
 
                     // TODO: test
+                /*
                 var i = 0;
                 var it = setInterval(function(){
                 db.run('INSERT INTO device (device_id, ssid) VALUES (?, ?)', "RELEASE1" + util.formatNumber(i, 4), util.formatNumber(i, 4), function(err){
@@ -48,6 +49,7 @@ var db = new sqlite3.Database(db_file, function(err){
                     clearInterval(it);
                 }
                 }, 10);
+                */
             });
         }
     })
