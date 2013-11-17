@@ -8,13 +8,11 @@ var device_test = function(device_id){
     var device_client = net.connect(port, function(){
         //send_heartbeat();
         send_login(device_id, new Buffer([0x11, 0x22, 0x33, 0x44, 0x55, 0x66]));
-        /*
         setInterval(function(){
             send_heartbeat();
-        }, 500);
-        */
+        }, 50000);
         //setTimeout(function(){send_status(device_id, 1, 123, 124, 129, 1);}, 500);
-        setTimeout(function(){send_sync_time(device_id);}, 500);
+        //setTimeout(function(){send_sync_time(device_id);}, 500);
         
         device_client.on('data', function(data){
             console.log(data);
@@ -146,7 +144,7 @@ var device_test = function(device_id){
 }
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
-for(var i = 1; i < 2; i++)
+for(var i = 200; i < 500; i++)
 {
     device_test("RELEASE1" + util.formatNumber(i, 4));
 }

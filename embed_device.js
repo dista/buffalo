@@ -349,9 +349,11 @@ exports.create_embed_device = function(c) {
         var proto_heartbeat = function(data, start, msg, len){
             write_data(util.buildGeneralOk(msg));
 
+            /*
             if(self.device){
                 db.set_online(self.device.id); 
             }
+            */
 
             handle_data_internal(data, util.getNextMsgPos(start, len));
         }

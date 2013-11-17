@@ -1,13 +1,14 @@
 var net = require("net");
 var util = require("../util.js");
-var port = 9000;
+var port = 7000;
 var ip = "103.21.136.175"
 
 var phone_client = net.connect(port, function(){
     //send_check_name("dista");
     //send_check_email("dista@qq.com");
     //send_register("dista", "dista@qq.com", "654321");
-    send_login("dista", "654321");
+    console.log(new Date());
+    send_login("userlw", "123456");
     //setTimeout(function(){send_asso("dista", "RELEASE10001", "myss1id");}, 1000);
     //setTimeout(function(){send_query_all();}, 1000);
     //setTimeout(function(){send_change_password("654321");}, 1000);
@@ -32,6 +33,7 @@ var phone_client = net.connect(port, function(){
     setTimeout(function(){send_heartbeat()}, 1000);
 
     phone_client.on('data', function(data){
+        console.log(new Date());
         console.log(data);
     });
 });

@@ -515,8 +515,10 @@ exports.create_phone = function(c) {
                             var buff = new Buffer(10 + buff_count);
                             util.setCommonPart(buff, msg);
                             buff[8] = 0x01;
-                            buff.writeUInt32BE(0, 9);
-                            buff.writeUInt32BE(self.session_id, 13);
+                            for(var i = 0; i < 8; i++){
+                                buff[9+i] = 65 // all 'A'
+                            }
+                            //buff.writeUInt32BE(self.session_id, 13);
                             buff[17] = all_devices.length;
 
                             var index = 18;
