@@ -285,6 +285,7 @@ exports.create_phone = function(c) {
 
             var name = data.toString('ascii', name_pos[0], name_pos[1]);
             var ssid = data.toString('ascii', ssid_pos[0], ssid_pos[1]);
+            var device;
 
             var user = null;
 
@@ -295,6 +296,7 @@ exports.create_phone = function(c) {
                     return;
                 }
 
+                db.set_ssid(device.id, ssid);
                 write_data(util.buildGeneralOk(msg));
                 handle_data_internal(data, util.getNextMsgPos(start, len));
             }
@@ -312,6 +314,7 @@ exports.create_phone = function(c) {
                     return;
                 }
 
+                device = row;
                 db.asso_user_device(user.id, row.id, asso_user_device_cb);
             }
 
@@ -831,6 +834,9 @@ exports.create_phone = function(c) {
                             if(data.readUInt32BE(start + 29) == 0){
                                 db.set_state(embed.device.id, data[start+28], util.dummy);
                             }
+                        }
+                        else if(msg["type"] == 0x19){
+                            db.set_locked(embed.device.id, data[start+28]);
                         }
 
                         write_data(util.buildGeneralOk(msg));

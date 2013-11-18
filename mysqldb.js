@@ -305,6 +305,14 @@ exports.set_online = function(id){
     db.query("UPDATE device set online=1 WHERE id=?", [id]);
 }
 
+exports.set_locked = function(id, locked){
+    db.query("UPDATE device set locked=? WHERE id=?", [locked, id]);
+}
+
+exports.set_ssid = function(id, ssid){
+    db.query("UPDATE device set ssid=? WHERE id=?", [ssid, id]);
+}
+
 exports.add_or_update_time = function(is_update, device_id, sid, start_time, end_time, repeatx, cb){
     if(is_update){
         db.query("UPDATE time SET start_time=?, end_time=?, repeatx=? WHERE sid=? and device_id=?", [start_time, end_time, repeatx, sid, device_id], cb);
