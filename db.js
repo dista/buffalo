@@ -151,6 +151,13 @@ exports.set_device_login = function(id, mac, cb){
     db.run("UPDATE device set mac=?, last_login=?, login_times=(login_times+1), online=1 WHERE id=?", mac, (new Date()), id, cb);
 }
 
+exports.set_state = function(id, state, cb){
+    db.run("UPDATE device set state=? WHERE id=?",
+            state,
+            id,
+            cb);
+}
+
 exports.set_device_status = function(device_id, state, temperature, humidity, battery, locked, cb)
 {
     db.run("UPDATE device set state=?, temperature=?, humidity=?, battery=?, locked=? WHERE device_id=?",

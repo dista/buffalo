@@ -26,7 +26,7 @@ exports.create_phone = function(c) {
         }
 
         var write_data = function(buff){
-            console.log(buff);
+            console.log("response: %s", util.formatBuffer(buff));
             self.sock.write(buff);
         }
 
@@ -73,7 +73,7 @@ exports.create_phone = function(c) {
                 return;
             }
 
-            console.log(data);
+            console.log("request: %s", util.formatBuffer(data));
 
             if(!self.remoteAddress)
             {
@@ -827,6 +827,12 @@ exports.create_phone = function(c) {
                 var on_proto_general_control = function(result, code) {
                     if(result == 1)
                     {
+                        if(msg["type"] == 0x15){
+                            if(data.readUInt32BE(start + 29) == 0){
+                                db.set_state(embed.device.id, data[start+28], util.dummy);
+                            }
+                        }
+
                         write_data(util.buildGeneralOk(msg));
                     }
                     else{

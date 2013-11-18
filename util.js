@@ -183,3 +183,21 @@ exports.formatNumber = function(num, len){
 
     return ret.slice(0, len);
 }
+
+exports.formatBuffer = function(buff){
+    var ret = "";
+    for(var i = 0; i < buff.length; i++){
+        var tmp = buff[i].toString(16);
+        if(tmp.length < 2){
+            tmp = "0" + tmp;
+        }
+
+        ret += tmp;
+
+        if(i < (buff.length - 1)){
+            ret += " ";
+        }
+    }
+
+    return ret;
+}

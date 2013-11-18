@@ -37,7 +37,7 @@ exports.create_embed_device = function(c) {
         }
 
         var write_data = function(buff){
-            console.log(buff);
+            console.log("response: %s", util.formatBuffer(buff));
             self.sock.write(buff);
         }
 
@@ -198,7 +198,7 @@ exports.create_embed_device = function(c) {
                 self.remotePort = self.sock.remotePort;
             }
 
-            console.log(data);
+            console.log("request: %s", util.formatBuffer(data));
 
             var len = util.checkMsg(data, start);
             if(len == null){

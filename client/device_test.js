@@ -144,7 +144,7 @@ var device_test = function(device_id){
 }
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
-for(var i = 200; i < 500; i++)
+for(var i = 200; i < 1200; i++)
 {
     device_test("RELEASE1" + util.formatNumber(i, 4));
 }
