@@ -301,6 +301,23 @@ exports.create_phone = function(c) {
                 handle_data_internal(data, util.getNextMsgPos(start, len));
             }
 
+            var get_user_device_cb = function(err, row){
+                if(err){
+                    write_data(util.buildErr(msg, error_code.DB_ERROR));
+                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    return;
+                }
+
+                if(row){
+                    write_data(util.buildErr(msg, error_code.DEVICE_USED));
+                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    return;
+                }
+                else{
+                    db.asso_user_device(user.id, device.id, asso_user_device_cb);
+                }
+            }
+
             var get_device_by_device_id_cb = function(err, row){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
@@ -315,7 +332,7 @@ exports.create_phone = function(c) {
                 }
 
                 device = row;
-                db.asso_user_device(user.id, row.id, asso_user_device_cb);
+                db.get_user_device(row.id, get_user_device_cb);
             }
 
             var get_user_cb = function(err, row){
@@ -597,6 +614,7 @@ exports.create_phone = function(c) {
 
         var proto_del_device = function(data, start, msg, len){
             var device_id = data.toString('ascii', start + 16, start + 16 + 12);
+            var device;
 
             var get_device_by_device_id_cb = function(err, row){
                 if(err){
@@ -616,10 +634,31 @@ exports.create_phone = function(c) {
                         write_data(util.buildErr(msg, error_code.DB_ERROR));
                     }
                     else{
+
                         write_data(util.buildGeneralOk(msg));
                     }
                     
                     handle_data_internal(data, util.getNextMsgPos(start, len));
+                }
+
+                var get_time_by_device_id_cb = function(err, rows){
+                    if(err){
+                        write_data(util.buildErr(msg, error_code.DB_ERROR));
+                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        return;
+                    }
+
+                    var embed = embed_device.find_by_device_id(device_id);
+                    if(embed){
+                        for(var i = 0; i < rows.length; i++){
+                            embed.del_time(rows[i].sid, util.dummy);
+                        }
+
+                        embed.lock(0, util.dummy);
+                        embed.control(0, 0, util.dummy);
+                    }
+
+                    db.del_from_time(row.id, del_from_time_cb);
                 }
 
                 var del_from_user_device_cb = function(err){
@@ -629,11 +668,11 @@ exports.create_phone = function(c) {
                         return;
                     }
 
-                    db.del_from_time(row.id, del_from_time_cb);
+                    device = row;
+                    db.get_time_by_device_id(row.id, get_time_by_device_id_cb);
                 }
 
-
-                db.del_from_user_device(row.id, del_from_user_device_cb);
+                db.del_from_user_device(row.id, self.user.id, del_from_user_device_cb);
             }
 
             db.get_device_by_device_id(device_id, get_device_by_device_id_cb);

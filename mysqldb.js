@@ -264,8 +264,8 @@ exports.get_random_password = function(){
     return crypto.randomBytes(3).toString('hex');
 }
 
-exports.del_from_user_device = function(device_id, cb){
-    db.query("DELETE FROM user_device WHERE device_id=?", [device_id], cb);
+exports.del_from_user_device = function(device_id, user_id, cb){
+    db.query("DELETE FROM user_device WHERE device_id=? AND user_id=?", [device_id, user_id], cb);
 }
 
 exports.del_from_time = function(device_id, cb){
@@ -285,6 +285,18 @@ exports.get_by_sid = function(sid, device_id, cb, ctx){
         }
         else{
             cb(err, null, ctx);
+        }
+    });
+}
+
+exports.get_user_device = function(device_id, cb){
+    db.query("SELECT * FROM user_device WHERE device_id=?", [device_id], function(err, rows){
+        console.log(rows);
+        if(!err && rows.length > 0){
+            cb(err, rows[0]);
+        }
+        else{
+            cb(err, null);
         }
     });
 }
