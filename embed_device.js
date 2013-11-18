@@ -413,7 +413,7 @@ exports.create_embed_device = function(c) {
                             data[start+11], //temperature
                             data[start+12], // humidity
                             data.readUInt16BE(start + 13), //battery
-                            data[start+14]); // locked
+                            data[start+15]); // locked
 
                 }
             }
