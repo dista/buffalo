@@ -1,24 +1,27 @@
 var net = require("net");
 var util = require("../util.js");
-var port = 6000;
-var ip = "127.0.0.1"
+var port = 7000;
+var ip = "115.29.164.141"
 
-var phone_client = net.connect(port, function(){
+var phone_test = function(name, device){
+var phone_client = net.connect(port, ip, function(){
     //send_check_name("dista");
     //send_check_email("dista@qq.com");
-    //for(var i = 900; i < 1300; i++){
-        send_register("dista" + 1, "dista"+ 1 +"@qq.com", "654321");
-    //}
-    //send_register("dista4", "dista4@qq.com", "654321");
+    /*
+    for(var i = 80; i < 100; i++){
+        send_register("dista"+i, "dista" + i + "@qq.com", "654321");
+    }
+    */
+    //send_register("dista90", "dista90@qq.com", "654321");
     //console.log(new Date());
-    //send_login("dista4", "654321");
-    //setTimeout(function(){send_asso("dista4", "RELEASE11003", "myss1id");}, 1000);
+    send_login(name, "654321");
+    //setTimeout(function(){send_asso(name, device, "myss1id");}, 1000);
     //setTimeout(function(){send_query_all();}, 1000);
     //setTimeout(function(){send_change_password("654321");}, 1000);
     //setTimeout(function(){send_logout();}, 1000);
     //setTimeout(function(){send_query_all();}, 2000);
-    //setTimeout(function(){send_control("RELEASE10001", 1, 20);}, 2000);
-    //setTimeout(function(){send_query_status("RELEASE10001");}, 2000);
+    //setTimeout(function(){send_control(device, 1, 20);}, 2000);
+    //setTimeout(function(){send_query_status(device);}, 3000);
     /*
     setTimeout(function(){send_upload_time("RELEASE10001",
             [{
@@ -36,7 +39,12 @@ var phone_client = net.connect(port, function(){
     //setTimeout(function(){send_heartbeat()}, 1000);
 
     phone_client.on('data', function(data){
-        console.log(new Date());
+        if(data[1] == 0x11){
+            setInterval(function(){send_control(device, 1, 20);}, 2000);
+            setInterval(function(){send_query_status(device);}, 3000);
+        }
+
+        //console.log(new Date());
         console.log(data);
     });
 });
@@ -233,4 +241,9 @@ var send_check_email = function(name){
 
     console.log(buff);
     phone_client.write(buff);
+}
+}
+
+for(var i = 0 ; i < 100; i++){
+    phone_test("dista" + i, "RELEASE1" + util.formatNumber(2000+i, 4));
 }
