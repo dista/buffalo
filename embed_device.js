@@ -38,7 +38,7 @@ exports.create_embed_device = function(c, one_step_cb) {
         }
 
         var write_data = function(buff){
-            console.log("response: %s", util.formatBuffer(buff));
+            console.log("response[%s]: %s", (new Date()), util.formatBuffer(buff));
             self.sock.write(buff);
         }
 
@@ -209,7 +209,7 @@ exports.create_embed_device = function(c, one_step_cb) {
                 self.one_step_cb(0);
             }
 
-            console.log("request: %s", util.formatBuffer(data, 10 + len));
+            console.log("request[%s]: %s", (new Date()), util.formatBuffer(data, 10 + len));
 
             var msg = {};
             var type = data[start + 1]; 
