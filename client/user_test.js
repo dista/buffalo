@@ -1,16 +1,18 @@
 var net = require("net");
 var util = require("../util.js");
-var port = 7000;
-var ip = "103.21.136.175"
+var port = 6000;
+var ip = "127.0.0.1"
 
 var phone_client = net.connect(port, function(){
     //send_check_name("dista");
     //send_check_email("dista@qq.com");
-    //send_register("dista3", "dista3@qq.com", "654321");
+    //for(var i = 900; i < 1300; i++){
+        send_register("dista" + 1, "dista"+ 1 +"@qq.com", "654321");
+    //}
     //send_register("dista4", "dista4@qq.com", "654321");
     //console.log(new Date());
-    send_login("dista4", "654321");
-    setTimeout(function(){send_asso("dista4", "RELEASE11003", "myss1id");}, 1000);
+    //send_login("dista4", "654321");
+    //setTimeout(function(){send_asso("dista4", "RELEASE11003", "myss1id");}, 1000);
     //setTimeout(function(){send_query_all();}, 1000);
     //setTimeout(function(){send_change_password("654321");}, 1000);
     //setTimeout(function(){send_logout();}, 1000);

@@ -2,8 +2,7 @@
     "name": "buffalo",
     "version": "0.1.0",
     "dependencies": {
-        "posix": "*",
-        "sqlite3": "*",
+        "posix": "1.0.x",
         "emailjs": "*",
         "mysql": "*"
     }

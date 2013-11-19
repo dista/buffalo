@@ -1,4 +1,3 @@
-var sqlite3 = require('sqlite3');
 var crypto = require("crypto");
 var util = require("./util.js");
 var mysql = require("mysql");

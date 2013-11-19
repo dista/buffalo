@@ -8,9 +8,10 @@ var util = require('./util.js');
 var notification = require('./notification.js');
 var config = require('./config.js');
 
-exports.create_phone = function(c) {
+exports.create_phone = function(c, one_step_cb) {
     var phone_constructor = function(){
         this.sock = c;
+        this.one_step_cb = one_step_cb;
         this.remoteAddress = null;
         this.user = null;
         var self = this;
@@ -53,8 +54,8 @@ exports.create_phone = function(c) {
             self.sock.destroy();
         }
 
-        this.handle_data = function(data){
-            handle_data_internal(data, 0);
+        this.handle_data = function(data, data_index){
+            handle_data_internal(data, data_index);
         }
 
         this.handle_end = function()
@@ -73,8 +74,6 @@ exports.create_phone = function(c) {
                 return;
             }
 
-            console.log("request: %s", util.formatBuffer(data));
-
             if(!self.remoteAddress)
             {
                 self.remoteAddress = self.sock.remoteAddress;
@@ -86,6 +85,12 @@ exports.create_phone = function(c) {
                 handle_protocal_error();
                 return null;
             }
+            else if(len == -2){
+                // no enough data
+                self.one_step_cb(0);
+            }
+
+            console.log("request: %s", util.formatBuffer(data, 10 + len));
 
             var msg = {};
             var type = data[start + 1]; 
@@ -97,7 +102,7 @@ exports.create_phone = function(c) {
             {
                 print_log("not logined, can't send msg");
                 write_data(util.buildErr(msg, error_code.NOT_LOGINED));
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
                 return;
             }
             
@@ -199,20 +204,20 @@ exports.create_phone = function(c) {
                 if(err)
                 {
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 if(!result)
                 {
                     write_data(util.buildErr(msg, error_code.ID_USED));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
                 else
                 {
                     write_data(util.buildGeneralOk(msg));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
             }
@@ -227,7 +232,7 @@ exports.create_phone = function(c) {
                 if(err)
                 {
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -235,13 +240,13 @@ exports.create_phone = function(c) {
                 if(!result)
                 {
                     write_data(util.buildErr(msg, error_code.ID_USED));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
                 else
                 {
                     write_data(util.buildGeneralOk(msg));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
             }
@@ -292,25 +297,25 @@ exports.create_phone = function(c) {
             var asso_user_device_cb = function(err){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 db.set_ssid(device.id, ssid);
                 write_data(util.buildGeneralOk(msg));
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
             }
 
             var get_user_device_cb = function(err, row){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 if(row){
                     write_data(util.buildErr(msg, error_code.DEVICE_USED));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
                 else{
@@ -321,13 +326,13 @@ exports.create_phone = function(c) {
             var get_device_by_device_id_cb = function(err, row){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 if(!row){
                     write_data(util.buildErr(msg, error_code.DEVICE_ID_NOT_FOUND));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -338,14 +343,14 @@ exports.create_phone = function(c) {
             var get_user_cb = function(err, row){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 if(!row)
                 {
                     write_data(util.buildErr(msg, error_code.NO_USER));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -372,26 +377,26 @@ exports.create_phone = function(c) {
                 if(err)
                 {
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 write_data(util.buildGeneralOk(msg));
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
             }
 
             var check_email_cb = function(err, result){
                 if(err)
                 {
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 if(!result)
                 {
                     write_data(util.buildErr(msg, error_code.EMAIL_USED));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
                 else
@@ -404,7 +409,7 @@ exports.create_phone = function(c) {
                 if(err)
                 {
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -412,7 +417,7 @@ exports.create_phone = function(c) {
                 if(!result)
                 {
                     write_data(util.buildErr(msg, error_code.USER_EXISTS));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
                 else
@@ -436,7 +441,7 @@ exports.create_phone = function(c) {
                     write_data(util.buildGeneralOk(msg));
                 }
 
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
             }
 
             db.set_password(self.user.id, new_password, set_password_cb);
@@ -446,7 +451,7 @@ exports.create_phone = function(c) {
             self.user = null; 
             
             write_data(util.buildGeneralOk(msg));
-            handle_data_internal(data, util.getNextMsgPos(start, len));
+            self.one_step_cb(util.getNextMsgPos(start, len) - start);
         }
 
         var proto_login = function(data, start, msg, len){
@@ -463,7 +468,7 @@ exports.create_phone = function(c) {
             var get_by_name_or_email_cb = function(err, row){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -475,14 +480,14 @@ exports.create_phone = function(c) {
                     } 
 
                     write_data(util.buildErr(msg, reason));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return
                 }
                 
                 if(row.password != db.get_hashed_password(password))
                 {
                     write_data(util.buildErr(msg, error_code.PASSWD_ERR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return
                 }
 
@@ -494,7 +499,7 @@ exports.create_phone = function(c) {
                 var on_get_all_devices = function(err, rows){
                     if(err){
                         write_data(util.buildErr(msg, error_code.DB_ERROR));
-                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        self.one_step_cb(util.getNextMsgPos(start, len) - start);
                         return;
                     }
 
@@ -507,7 +512,7 @@ exports.create_phone = function(c) {
                         if(err){
                             send_resp = true;
                             write_data(util.buildErr(msg, error_code.DB_ERROR));
-                            handle_data_internal(data, util.getNextMsgPos(start, len));
+                            self.one_step_cb(util.getNextMsgPos(start, len) - start);
                             return;
                         }
 
@@ -575,7 +580,7 @@ exports.create_phone = function(c) {
                             self.user = user; 
                             db.set_login_info(user.id);
                             phones.push(self);
-                            handle_data_internal(data, util.getNextMsgPos(start, len));
+                            self.one_step_cb(util.getNextMsgPos(start, len) - start);
                         }
                     }
 
@@ -601,7 +606,7 @@ exports.create_phone = function(c) {
                         write_data(buff);
 
                         phones.push(self);
-                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        self.one_step_cb(util.getNextMsgPos(start, len) - start);
                         */
                     }
                 }
@@ -619,13 +624,13 @@ exports.create_phone = function(c) {
             var get_device_by_device_id_cb = function(err, row){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 if(!row){
                     write_data(util.buildErr(msg, error_code.DEVICE_ID_NOT_FOUND));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -638,13 +643,13 @@ exports.create_phone = function(c) {
                         write_data(util.buildGeneralOk(msg));
                     }
                     
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                 }
 
                 var get_time_by_device_id_cb = function(err, rows){
                     if(err){
                         write_data(util.buildErr(msg, error_code.DB_ERROR));
-                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        self.one_step_cb(util.getNextMsgPos(start, len) - start);
                         return;
                     }
 
@@ -664,7 +669,7 @@ exports.create_phone = function(c) {
                 var del_from_user_device_cb = function(err){
                     if(err){
                         write_data(util.buildErr(msg, error_code.DB_ERROR));
-                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        self.one_step_cb(util.getNextMsgPos(start, len) - start);
                         return;
                     }
 
@@ -686,7 +691,7 @@ exports.create_phone = function(c) {
             if(embed == null || embed.device == null)
             {
                 write_data(util.buildErr(msg, error_code.DEVICE_OFFLINE));
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
                 return;
             }
             
@@ -694,7 +699,7 @@ exports.create_phone = function(c) {
             {
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -708,14 +713,14 @@ exports.create_phone = function(c) {
 
                 if(!found){
                     write_data(util.buildErr(msg, error_code.DEVICE_ID_NOT_FOUND));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 var on_del_time = function(result, code){
                     if(result == 0){
                         write_data(util.buildErr(msg, code));
-                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        self.one_step_cb(util.getNextMsgPos(start, len) - start);
                         return;
                     }
 
@@ -726,8 +731,7 @@ exports.create_phone = function(c) {
                         else{
                             write_data(util.buildGeneralOk(msg));
                         }
-                        
-                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     }
 
                     db.del_time(time_id, embed.device.id, del_time_cb);
@@ -753,32 +757,32 @@ exports.create_phone = function(c) {
                     write_data(util.buildGeneralOk(msg));
                 }
 
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
             }
             */
 
             var set_password_cb = function(err){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 notification.send_mail(email, user.name, password, util.dummy); 
                 write_data(util.buildGeneralOk(msg));
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
             }
 
             var get_by_name_or_email_cb = function(err, row){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 if(!row){
                     write_data(util.buildErr(msg, error_code.EMAIL_NOT_FOUND));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -795,7 +799,7 @@ exports.create_phone = function(c) {
             var get_all_devices_cb = function(err, rows){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -829,7 +833,7 @@ exports.create_phone = function(c) {
                 util.setChecksum(buff);
                 write_data(buff);
                 
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
             }
 
             db.get_all_devices(self.user.id, get_all_devices_cb);
@@ -842,13 +846,13 @@ exports.create_phone = function(c) {
             if(embed == null)
             {
                 write_data(util.buildErr(msg, error_code.DEVICE_OFFLINE));
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
                 return;
             }
             var get_all_devices_cb = function(err, rows){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -862,7 +866,7 @@ exports.create_phone = function(c) {
 
                 if(!found){
                     write_data(util.buildErr(msg, error_code.DEVICE_ID_NOT_FOUND));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
@@ -884,7 +888,7 @@ exports.create_phone = function(c) {
                         write_data(util.buildErr(msg, code));
                     }
 
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                 }
             
                 if(msg["type"] == 0x15)
@@ -913,7 +917,7 @@ exports.create_phone = function(c) {
                             write_data(buff);
                         }
 
-                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     }
 
                     embed.query(on_query_cb);
@@ -931,7 +935,7 @@ exports.create_phone = function(c) {
                         if(err){
                             resp_send = true;
                             write_data(util.buildErr(msg, error_code.DB_ERROR));
-                            handle_data_internal(data, util.getNextMsgPos(start, len));
+                            self.one_step_cb(util.getNextMsgPos(start, len) - start);
                             return;
                         }
 
@@ -940,7 +944,7 @@ exports.create_phone = function(c) {
                         if(done_count == count)
                         {
                             write_data(util.buildGeneralOk(msg));
-                            handle_data_internal(data, util.getNextMsgPos(start, len));
+                            self.one_step_cb(util.getNextMsgPos(start, len) - start);
                             return;
                         }
                     }
@@ -953,7 +957,7 @@ exports.create_phone = function(c) {
                         if(err){
                             resp_send = true;
                             write_data(util.buildErr(msg, error_code.DB_ERROR));
-                            handle_data_internal(data, util.getNextMsgPos(start, len));
+                            self.one_step_cb(util.getNextMsgPos(start, len) - start);
                             return;
                         }
                         
@@ -974,7 +978,7 @@ exports.create_phone = function(c) {
                     var on_upload_time = function(result, code){
                         if(result != 1){
                             write_data(util.buildErr(msg, code));
-                            handle_data_internal(data, util.getNextMsgPos(start, len));
+                            self.one_step_cb(util.getNextMsgPos(start, len) - start);
                             return;
                         }
 
@@ -1008,7 +1012,7 @@ exports.create_phone = function(c) {
 
         var proto_heartbeat = function(data, start, msg, len){
             write_data(util.buildGeneralOk(msg));
-            handle_data_internal(data, util.getNextMsgPos(start, len));
+            self.one_step_cb(util.getNextMsgPos(start, len) - start);
         }
 
         return this;

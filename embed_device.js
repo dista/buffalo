@@ -22,9 +22,10 @@ exports.find_by_device_id = function(id) {
     return null;
 }
 
-exports.create_embed_device = function(c) {
+exports.create_embed_device = function(c, one_step_cb) {
     var embed_device = function(){
         this.sock = c;
+        this.one_step_cb = one_step_cb;
         this.remoteAddress = null;
         this.device_id;
         this.device = null;
@@ -104,8 +105,8 @@ exports.create_embed_device = function(c) {
             return ret;
         }
         
-        this.handle_data = function(data){
-            handle_data_internal(data, 0);
+        this.handle_data = function(data, data_index){
+            handle_data_internal(data, data_index);
         }
 
         var device_timeout = function(msg){
@@ -198,13 +199,17 @@ exports.create_embed_device = function(c) {
                 self.remotePort = self.sock.remotePort;
             }
 
-            console.log("request: %s", util.formatBuffer(data));
-
             var len = util.checkMsg(data, start);
             if(len == null){
                 handle_protocal_error();
                 return null;
             }
+            else if(len == -2){
+                // no enough data
+                self.one_step_cb(0);
+            }
+
+            console.log("request: %s", util.formatBuffer(data, 10 + len));
 
             var msg = {};
             var type = data[start + 1]; 
@@ -214,7 +219,7 @@ exports.create_embed_device = function(c) {
             if(self.device == null && type != 0x31){
                 print_log("not logined, can't send msg");
                 write_data(util.buildErr(msg, error_code.NOT_LOGINED));
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
                 return;
             }
             
@@ -284,14 +289,14 @@ exports.create_embed_device = function(c) {
             var set_device_login_cb = function(err){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 var get_time_by_device_id_cb = function(err, rows){
                     if(err){
                         write_data(util.buildErr(msg, error_code.DB_ERROR));
-                        handle_data_internal(data, util.getNextMsgPos(start, len));
+                        self.one_step_cb(util.getNextMsgPos(start, len) - start);
                         return;
                     }
 
@@ -320,7 +325,7 @@ exports.create_embed_device = function(c) {
                     write_data(buff);
 
                     embeds.push(self);
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                 }
 
                 db.get_time_by_device_id(self.device.id, get_time_by_device_id_cb);
@@ -329,13 +334,13 @@ exports.create_embed_device = function(c) {
             var get_device_by_device_id_cb = function(err, row){
                 if(err){
                     write_data(util.buildErr(msg, error_code.DB_ERROR));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return;
                 }
 
                 if(!row){
                     write_data(util.buildErr(msg, error_code.DEVICE_ID_NOT_FOUND));
-                    handle_data_internal(data, util.getNextMsgPos(start, len));
+                    self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return
                 }
 
@@ -355,7 +360,7 @@ exports.create_embed_device = function(c) {
             }
             */
 
-            handle_data_internal(data, util.getNextMsgPos(start, len));
+            self.one_step_cb(util.getNextMsgPos(start, len) - start);
         }
 
         var proto_sync_time = function(data, start, msg, len){
@@ -367,7 +372,7 @@ exports.create_embed_device = function(c) {
             util.setChecksum(buff);
             
             write_data(buff);
-            handle_data_internal(data, util.getNextMsgPos(start, len));
+            self.one_step_cb(util.getNextMsgPos(start, len) - start);
         }
 
         var proto_status = function(data, start, msg, len){
@@ -387,7 +392,7 @@ exports.create_embed_device = function(c) {
                     write_data(util.buildGeneralOk(msg));
                 }
 
-                handle_data_internal(data, util.getNextMsgPos(start, len));
+                self.one_step_cb(util.getNextMsgPos(start, len) - start);
             }
 
             db.set_device_status(device_id, state, temperature, humidity, battery, locked, set_device_status_cb);
@@ -418,7 +423,7 @@ exports.create_embed_device = function(c) {
                 }
             }
             
-            handle_data_internal(data, util.getNextMsgPos(start, len));
+            self.one_step_cb(util.getNextMsgPos(start, len) - start);
         }
 
         var proto_general_control_response = function(data, start, msg, len) {
@@ -434,7 +439,7 @@ exports.create_embed_device = function(c) {
                 cb["cb"](data[start + 8], data[start + 9]);
             }
 
-            handle_data_internal(data, util.getNextMsgPos(start, len));
+            self.one_step_cb(util.getNextMsgPos(start, len) - start);
         }
 
         return this;

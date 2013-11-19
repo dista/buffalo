@@ -121,23 +121,25 @@ var setChecksum = function(buff)
 exports.setChecksum = setChecksum;
 
 exports.checkMsg = function(data, start){
-    if(start + 8 > data.length)
-    {
+    // there is enough data, buf not start with 0x97, protocal err
+    if(start < data.length && data[start] != 0x97){
         return null;
     }
 
-    if(data[start] != 0x97){
-        return null;
+    if(start + 8 > data.length)
+    {
+        return -2;
     }
 
     var len = data.readUInt16BE(start + 6);
 
-    if(data[start + 10 + len - 1] != 0x99)
+    if(start + 10 + len > data.length)
     {
-        return null;
+        return -2;
     }
 
-    if(start + 10 + len > data.length)
+    // there is enough data, buf not end with 0x99, protocal err
+    if(data[start + 10 + len - 1] != 0x99)
     {
         return null;
     }
@@ -184,9 +186,13 @@ exports.formatNumber = function(num, len){
     return ret.slice(0, len);
 }
 
-exports.formatBuffer = function(buff){
+exports.formatBuffer = function(buff, len){
+    if(len == undefined){
+        len = buff.length;
+    }
+
     var ret = "";
-    for(var i = 0; i < buff.length; i++){
+    for(var i = 0; i < len; i++){
         var tmp = buff[i].toString(16);
         if(tmp.length < 2){
             tmp = "0" + tmp;
@@ -194,7 +200,7 @@ exports.formatBuffer = function(buff){
 
         ret += tmp;
 
-        if(i < (buff.length - 1)){
+        if(i < (len - 1)){
             ret += " ";
         }
     }
