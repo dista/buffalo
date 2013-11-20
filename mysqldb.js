@@ -19,7 +19,8 @@ function handle_disconnect(){
 
     db.connect(function(err){
         if(err){
-            die("connect mysql error", err);
+            console.log("error when connect to db: ", error);
+            setTimeout(handle_disconnect, 2000);
             return;
         }
 
