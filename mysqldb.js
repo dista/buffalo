@@ -3,6 +3,7 @@ var util = require("./util.js");
 var mysql = require("mysql");
 
 var db;
+var dbname = "buffalo5002";
 
 var die = function(msg, err){
     console.log(msg + ": " + err);
@@ -14,7 +15,7 @@ function handle_disconnect(){
         host : "localhost",
         user: "buffalo",
         password: "buffalo",
-        database: "buffalo"
+        database: dbname
     });
 
     db.connect(function(err){
@@ -25,9 +26,10 @@ function handle_disconnect(){
         }
 
         /*
-        db.query('use buffalo', function(){
+        db.query('use ' + dbname, function(){
             for(var i = 0; i <= 5000; i++){
                 db.query('INSERT INTO device (device_id, ssid) VALUES (?, ?)', ["RELEASE1" + util.formatNumber(i, 4), util.formatNumber(i, 4)]);
+                console.log(i);
             }
         });
         */
@@ -35,15 +37,15 @@ function handle_disconnect(){
         db.query("show databases", function(err, rows){
             var has_db = false;
             for(var i = 0; i < rows.length; i++){
-                if(rows[i].Database == "buffalo"){
+                if(rows[i].Database == dbname){
                     has_db = true;
                     break;
                 }
             }
 
             if(!has_db){
-                db.query('CREATE DATABASE IF NOT EXISTS buffalo', function(){
-                db.query('use buffalo', function(){
+                db.query('CREATE DATABASE IF NOT EXISTS ' + dbname, function(){
+                db.query('use ' + dbname, function(){
                 db.query('CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(32) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64), created_time DATETIME, last_login DATETIME, login_times INT(11) DEFAULT 0)', function(){
                 db.query('CREATE INDEX name_index ON user(name)', function(){
                 db.query('CREATE INDEX email_index ON user(email)', function(){
