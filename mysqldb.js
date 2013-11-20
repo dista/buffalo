@@ -2,97 +2,112 @@ var crypto = require("crypto");
 var util = require("./util.js");
 var mysql = require("mysql");
 
-var db = mysql.createConnection({
-    host : "localhost",
-    user: "buffalo",
-    password: "buffalo",
-    database: "buffalo"
-});
+var db;
 
 var die = function(msg, err){
     console.log(msg + ": " + err);
     process.exit(1);
 }
 
-db.connect(function(err){
-    if(err){
-        die("connect mysql error", err);
-        return;
-    }
-
-    /*
-    db.query('use buffalo', function(){
-        for(var i = 0; i <= 5000; i++){
-            db.query('INSERT INTO device (device_id, ssid) VALUES (?, ?)', ["RELEASE1" + util.formatNumber(i, 4), util.formatNumber(i, 4)]);
-        }
+function handle_disconnect(){
+    db = mysql.createConnection({
+        host : "localhost",
+        user: "buffalo",
+        password: "buffalo",
+        database: "buffalo"
     });
-    */
 
-    db.query("show databases", function(err, rows){
-        var has_db = false;
-        for(var i = 0; i < rows.length; i++){
-            if(rows[i].Database == "buffalo"){
-                has_db = true;
-                break;
+    db.connect(function(err){
+        if(err){
+            die("connect mysql error", err);
+            return;
+        }
+
+        /*
+        db.query('use buffalo', function(){
+            for(var i = 0; i <= 5000; i++){
+                db.query('INSERT INTO device (device_id, ssid) VALUES (?, ?)', ["RELEASE1" + util.formatNumber(i, 4), util.formatNumber(i, 4)]);
             }
-        }
+        });
+        */
 
-        if(!has_db){
-            db.query('CREATE DATABASE IF NOT EXISTS buffalo', function(){
-            db.query('use buffalo', function(){
-            db.query('CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(32) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64), created_time DATETIME, last_login DATETIME, login_times INT(11) DEFAULT 0)', function(){
-            db.query('CREATE INDEX name_index ON user(name)', function(){
-            db.query('CREATE INDEX email_index ON user(email)', function(){
-            db.query('CREATE INDEX name_pass_index ON user(name, password)', function(){
-            db.query('CREATE INDEX email_pass_index ON user(email, password)', function(){
-            db.query('CREATE TABLE device (id INT PRIMARY KEY AUTO_INCREMENT, device_id VARCHAR(16) UNIQUE NOT NULL, ssid VARCHAR(32), mac VARCHAR(32), state TINYINT DEFAULT 0, temperature TINYINT DEFAULT 0,' +
-                   'humidity TINYINT DEFAULT 0, battery SMALLINT DEFAULT 0, locked TINYINT DEFAULT 0, online TINYINT DEFAULT 0, last_login DATETIME, login_times INT DEFAULT 0)', function(){
-            db.query('CREATE INDEX device_id_index ON device(device_id)', function(){
-            db.query('CREATE TABLE user_device(user_id INT, device_id INT)', function(){
-            db.query('CREATE INDEX user_id_index on user_device(user_id)', function(){
-            db.query('CREATE UNIQUE INDEX user_device_index on user_device(user_id, device_id)', function(){
-            db.query('CREATE TABLE IF NOT EXISTS time (sid TINYINT, start_time INT, end_time INT, repeatx TINYINT, device_id INT,'+
-                   ' FOREIGN KEY(device_id) REFERENCES device(id))', function(){
-            db.query('CREATE UNIQUE INDEX sid_index ON time(sid, device_id)', function(){
-            // last
-            });
-            });
-            });
-            });
-            });
-            });
-            });
-            });
-            });
-            });
-            });
-            });
-            });
-            });
-        }
+        db.query("show databases", function(err, rows){
+            var has_db = false;
+            for(var i = 0; i < rows.length; i++){
+                if(rows[i].Database == "buffalo"){
+                    has_db = true;
+                    break;
+                }
+            }
+
+            if(!has_db){
+                db.query('CREATE DATABASE IF NOT EXISTS buffalo', function(){
+                db.query('use buffalo', function(){
+                db.query('CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(32) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64), created_time DATETIME, last_login DATETIME, login_times INT(11) DEFAULT 0)', function(){
+                db.query('CREATE INDEX name_index ON user(name)', function(){
+                db.query('CREATE INDEX email_index ON user(email)', function(){
+                db.query('CREATE INDEX name_pass_index ON user(name, password)', function(){
+                db.query('CREATE INDEX email_pass_index ON user(email, password)', function(){
+                db.query('CREATE TABLE device (id INT PRIMARY KEY AUTO_INCREMENT, device_id VARCHAR(16) UNIQUE NOT NULL, ssid VARCHAR(32), mac VARCHAR(32), state TINYINT DEFAULT 0, temperature TINYINT DEFAULT 0,' +
+                       'humidity TINYINT DEFAULT 0, battery SMALLINT DEFAULT 0, locked TINYINT DEFAULT 0, online TINYINT DEFAULT 0, last_login DATETIME, login_times INT DEFAULT 0)', function(){
+                db.query('CREATE INDEX device_id_index ON device(device_id)', function(){
+                db.query('CREATE TABLE user_device(user_id INT, device_id INT)', function(){
+                db.query('CREATE INDEX user_id_index on user_device(user_id)', function(){
+                db.query('CREATE UNIQUE INDEX user_device_index on user_device(user_id, device_id)', function(){
+                db.query('CREATE TABLE IF NOT EXISTS time (sid TINYINT, start_time INT, end_time INT, repeatx TINYINT, device_id INT,'+
+                       ' FOREIGN KEY(device_id) REFERENCES device(id))', function(){
+                db.query('CREATE UNIQUE INDEX sid_index ON time(sid, device_id)', function(){
+                // last
+                });
+                });
+                });
+                });
+                });
+                });
+                });
+                });
+                });
+                });
+                });
+                });
+                });
+                });
+            }
+        });
+
+        /*
+        db.query('CREATE DATABASE IF NOT EXISTS buffalo');
+        db.query('CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(32) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64), created_time DATETIME, last_login DATETIME, login_times INT(11) DEFAULT 0)', function(err, rows){
+            console.log(err);
+        });
+        db.query('CREATE INDEX name_index ON user(name)');
+        db.query('CREATE INDEX email_index ON user(email)');
+        db.query('CREATE INDEX name_pass_index ON user(name, password)');
+        db.query('CREATE INDEX email_pass_index ON user(email, password)');
+        db.query('CREATE TABLE device (id INT PRIMARY KEY AUTO_INCREMENT, device_id VARCHAR(16) UNIQUE NOT NULL, ssid VARCHAR(32), mac VARCHAR(32), state TINYINT DEFAULT 0, temperature TINYINT DEFAULT 0,' +
+               'humidity TINYINT DEFAULT 0, battery SMALLINT DEFAULT 0, locked TINYINT DEFAULT 0, online TINYINT DEFAULT 0, last_login DATETIME, login_times INT DEFAULT 0)');
+        db.query('CREATE INDEX device_id_index ON device(device_id)');
+        db.query('CREATE TABLE user_device(user_id INT, device_id INT)');
+        db.query('CREATE INDEX user_id_index on user_device(user_id)');
+        db.query('CREATE UNIQUE INDEX user_device_index on user_device(user_id, device_id)');
+        db.query('CREATE TABLE IF NOT EXISTS time (sid TINYINT, start_time INT, end_time INT, repeatx TINYINT, device_id INT,'+
+               ' FOREIGN KEY(device_id) REFERENCES device(id))');
+        db.query('CREATE UNIQUE INDEX sid_index ON time(sid, device_id)');
+        */
     });
 
-    /*
-    db.query('CREATE DATABASE IF NOT EXISTS buffalo');
-    db.query('CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(32) UNIQUE, email VARCHAR(100) UNIQUE, password VARCHAR(64), created_time DATETIME, last_login DATETIME, login_times INT(11) DEFAULT 0)', function(err, rows){
-        console.log(err);
-    });
-    db.query('CREATE INDEX name_index ON user(name)');
-    db.query('CREATE INDEX email_index ON user(email)');
-    db.query('CREATE INDEX name_pass_index ON user(name, password)');
-    db.query('CREATE INDEX email_pass_index ON user(email, password)');
-    db.query('CREATE TABLE device (id INT PRIMARY KEY AUTO_INCREMENT, device_id VARCHAR(16) UNIQUE NOT NULL, ssid VARCHAR(32), mac VARCHAR(32), state TINYINT DEFAULT 0, temperature TINYINT DEFAULT 0,' +
-           'humidity TINYINT DEFAULT 0, battery SMALLINT DEFAULT 0, locked TINYINT DEFAULT 0, online TINYINT DEFAULT 0, last_login DATETIME, login_times INT DEFAULT 0)');
-    db.query('CREATE INDEX device_id_index ON device(device_id)');
-    db.query('CREATE TABLE user_device(user_id INT, device_id INT)');
-    db.query('CREATE INDEX user_id_index on user_device(user_id)');
-    db.query('CREATE UNIQUE INDEX user_device_index on user_device(user_id, device_id)');
-    db.query('CREATE TABLE IF NOT EXISTS time (sid TINYINT, start_time INT, end_time INT, repeatx TINYINT, device_id INT,'+
-           ' FOREIGN KEY(device_id) REFERENCES device(id))');
-    db.query('CREATE UNIQUE INDEX sid_index ON time(sid, device_id)');
-    */
-});
+    db.on('error', function(err){
+        console.log('db error', err);
 
+        if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+            handle_disconnect();                         // lost due to either server restart, or a
+        } else {                                      // connnection idle timeout (the wait_timeout
+            throw err;                                  // server variable configures this)
+        }
+    });
+}
+
+handle_disconnect();
 
 exports.register_user = function(name, email, password, cb)
 {
