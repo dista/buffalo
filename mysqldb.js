@@ -3,7 +3,7 @@ var util = require("./util.js");
 var mysql = require("mysql");
 
 var db;
-var dbname = "buffalo5002";
+var dbname = "buffalo";
 
 var die = function(msg, err){
     console.log(msg + ": " + err);
