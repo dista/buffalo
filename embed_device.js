@@ -22,6 +22,18 @@ exports.find_by_device_id = function(id) {
     return null;
 }
 
+var find_device_not_self = function(id, obj){
+    for(var i = 0; i < embeds.length; i++)
+    {
+        if(util.compareDeviceId(embeds[i].device_id, id) && embeds[i] != obj)
+        {
+            return embeds[i];
+        }
+    }
+
+    return null;
+}
+
 exports.create_embed_device = function(c, one_step_cb) {
     var embed_device = function(){
         this.sock = c;
@@ -42,6 +54,15 @@ exports.create_embed_device = function(c, one_step_cb) {
             self.sock.write(buff);
         }
 
+        var set_offline_cb = function(err){
+            if(!err){
+                var found = find_device_not_self(self.device_id, self);
+                if(found){
+                    db.set_online(self.device.id);
+                }
+            }
+        }
+
         var remove_embed_device = function()
         {
             for(var i = 0; i < embeds.length; i++)
@@ -52,7 +73,7 @@ exports.create_embed_device = function(c, one_step_cb) {
                             self.remoteAddress, self.remotePort,
                             embeds.length - 1);
                     if(self.device){
-                        db.set_offline(self.device.id);
+                        db.set_offline(self.device.id, set_offline_cb);
                     }
                     embeds.splice(i, 1);
                     break;

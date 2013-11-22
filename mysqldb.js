@@ -326,8 +326,8 @@ var get_time_by_device_id = function(device_id, cb, ctx){
 
 exports.get_time_by_device_id = get_time_by_device_id;
 
-exports.set_offline = function(id){
-    db.query("UPDATE device set online=0 WHERE id=?", [id]);
+exports.set_offline = function(id, cb){
+    db.query("UPDATE device set online=0 WHERE id=?", [id], cb);
 }
 
 exports.set_online = function(id){
