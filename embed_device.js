@@ -28,7 +28,6 @@ exports.create_embed_device = function(c, one_step_cb) {
         this.one_step_cb = one_step_cb;
         this.remoteAddress = null;
         this.device_id;
-        this.set_offline = true;
         this.device = null;
         var pending_cbs = [];
         var self = this;
@@ -52,7 +51,7 @@ exports.create_embed_device = function(c, one_step_cb) {
                     console.log("embed_device client[%s:%s] removed, current embed_devices: %d",
                             self.remoteAddress, self.remotePort,
                             embeds.length - 1);
-                    if(self.device && self.set_offline){
+                    if(self.device){
                         db.set_offline(self.device.id);
                     }
                     embeds.splice(i, 1);
@@ -68,7 +67,6 @@ exports.create_embed_device = function(c, one_step_cb) {
                 {
                     if(embeds[i] != self){
                         print_log("another device already logined, destroy it");
-                        embeds[i].set_offline = false;
                         embeds[i].sock.destroy();
                         embeds.splice(i, 1);
                     }
