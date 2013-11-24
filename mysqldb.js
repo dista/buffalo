@@ -120,6 +120,11 @@ else{
 }
 
 var query_wrapper = function(sql, binds, cb){
+    if(typeof(binds) == 'function'){
+        cb = binds;
+        binds = undefined;
+    }
+
     cb = cb || util.dummy;
 
     if(!use_pool){
