@@ -29,7 +29,7 @@ function connect_with_reconnect_enable(){
 
         /*
         db.query('use ' + dbname, function(){
-            for(var i = 0; i <= 5000; i++){
+            for(var i = 5002; i <= 20000; i++){
                 db.query('INSERT INTO device (device_id, ssid) VALUES (?, ?)', ["RELEASE1" + util.formatNumber(i, 4), util.formatNumber(i, 4)]);
                 console.log(i);
             }
@@ -120,6 +120,8 @@ else{
 }
 
 var query_wrapper = function(sql, binds, cb){
+    cb = cb || util.dummy;
+
     if(!use_pool){
         db.query(sql, binds, cb);
     }
