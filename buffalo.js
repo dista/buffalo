@@ -2,6 +2,7 @@ var net = require('net');
 var embed_device = require('./embed_device.js');
 var phone = require('./phone.js');
 var posix = require('posix');
+var cluster = require('cluster');
 var port = 7000;
 
 function handleClient(c)
@@ -128,8 +129,20 @@ function handleClient(c)
 
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
-var server = net.createServer(handleClient);
+var numCPUs = require('os').cpus().length;
+if(cluster.isMaster){
+    for (var i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
 
-server.listen(port, function(){
+    cluster.on('exit', function(worker, code, signal) {
+        console.log('worker ' + worker.process.pid + ' died, restarting...');
+        cluster.fork();
+    });
+}
+else{
+    var server = net.createServer(handleClient);
+    server.listen(port, function(){
         console.log("Welcome, Buffalo server started. Port " + port + ", server time " + (new Date()));
         });
+}
