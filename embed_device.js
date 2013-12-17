@@ -10,7 +10,7 @@ var embeds = {};
 var proxies = {};
 var user_id_count = 0;
 var package_id = 0;
-var timeout_mseconds = 15000;
+var timeout_mseconds = 5000;
 var proxy_id = 0;
 var pending_proxy_cbs = {};
 
@@ -18,19 +18,27 @@ var find_by_proxy_id = function(proxy_id){
     return proxies[proxy_id];
 }
 
-var send_general_msg_cluster = function(msg, type, code){
-    var result = {};
-    result["to"] = "device";
-    result["type"] = type;
-    result["server_id"] = msg["from"];
-    result["cb_id"] = msg["cb_id"];
-    result["proxy_id"] = msg["proxy_id"];
-    result["device_id"] = msg["device_id"];
-    result["data"] = {};
-    result["data"]["result"] = 0;
-    result["data"]["code"] = code;
-    
-    send_msg_to_master(result);
+var build_general_msg_cluster = function(msg, type, result, code){
+    var ret = {};
+    ret["to"] = "device";
+    ret["type"] = type;
+    ret["server_id"] = msg["from"];
+    ret["cb_id"] = msg["cb_id"];
+    ret["proxy_id"] = msg["proxy_id"];
+    ret["device_id"] = msg["device_id"];
+    ret["data"] = {};
+    ret["data"]["result"] = result;
+    ret["data"]["code"] = code;
+   
+    return ret; 
+}
+
+var send_general_msg_cluster = function(msg, type, result, code){
+    var ret = build_general_msg_cluster(
+                        msg, type, result, code
+                    );
+
+    send_msg_to_master(ret);
 }
 
 exports.notify_msg = function(msg){
@@ -43,24 +51,66 @@ exports.notify_msg = function(msg){
             var device_id = msg["device_id"];
             var device = find_by_device_id(device_id);
 
-            if(device){
+            if(device && !device.is_cluster()){
                 db.set_online(device.id);
             }
         }
-        else if(type == "del_time"){
-            var del_time_cb = function(err){
-                send_general_msg_cluster(msg, type + "_cb", err);
+        else if(type == "del_time"
+               || type == "control"
+               || type == "upload_time"
+               || type == "lock"
+               || type == "del_delay"
+               || type == "query"
+        ){
+            var general_cb = function(result, code){
+                send_general_msg_cluster(msg, type + "_cb", result, code);
+            }
+
+            var query_cb = function(result, code, state, temperature,
+                    humidity, battery, locked)
+            {
+                var ret = build_general_msg_cluster(msg, type + "_cb", result, code);
+                ret["data"]["state"] = state;
+                ret["data"]["temperature"] = temperature;
+                ret["data"]["humidity"] = humidity;
+                ret["data"]["battery"] = battery;
+                ret["data"]["locked"] = locked;
+
+                send_msg_to_master(ret);
             }
 
             var device = find_by_device_id(msg["device_id"]);
             if(!device){
-                send_general_msg_cluster(msg, type + "_cb", error_code.DEVICE_ID_NOT_FOUND); 
+                send_general_msg_cluster(msg, type + "_cb", 0, error_code.DEVICE_ID_NOT_FOUND); 
             }
             else{
-                device.del_time(msg["data"]["time_id"], del_time_cb);
+                if(type == "del_time"){
+                    device.del_time(msg["data"]["time_id"], general_cb);
+                }
+                else if(type == "control")
+                {
+                    device.control(msg["data"]["open_or_not"],
+                                   msg["data"]["delay"],
+                                   general_cb);
+                }
+                else if(type == "upload_time"){
+                    device.upload_time(new Buffer(msg["data"]["buff"]),
+                                       general_cb);
+                }
+                else if(type == "lock"){
+                    device.lock(msg["data"]["locked"],
+                                general_cb);
+                }
+                else if(type == "del_delay"){
+                    device.del_delay(general_cb);
+                }
+                else if(type == "query"){
+                    device.query(query_cb);
+                }
             }
         }
-        else if(type == "del_time_cb" || type == "control_cb"
+        else if(type == "del_time_cb"
+               || type == "control_cb"
                || type == "upload_time_cb"
                || type == "lock_cb"
                || type == "del_delay_cb"
@@ -98,10 +148,13 @@ exports.notify_msg = function(msg){
                     }
                 }
             }
+            else{
+                need_create = true;
+            }
 
             if(need_create){
                 var cd = new cluster_device(msg["from"], msg["proxy_id"],
-                        msg["device_id"]);
+                        msg["device_id"], msg["device"]);
 
                 embeds[msg["device_id"]] = cd;
             }
@@ -171,7 +224,7 @@ exports.create_embed_device = function(c, one_step_cb) {
 
         var print_log = function(msg)
         {
-            console.log("device[%s]; ip[%s:%s]: %s", self.device_id, self.remoteAddress, self.remotePort, msg); 
+            console.log("worker[%s]; device[%s]; ip[%s:%s]: %s", cluster.worker.id, self.device_id, self.remoteAddress, self.remotePort, msg); 
         }
 
         var write_data = function(buff){
@@ -195,7 +248,6 @@ exports.create_embed_device = function(c, one_step_cb) {
             var msg = {};
             msg["proxy_id"] = self.proxy_id;
             msg["device_id"] = self.device_id;
-            msg["server_id"] = cluster.worker.id;
             msg["type"] = "exit";
             msg["to"] = "device";
 
@@ -208,7 +260,7 @@ exports.create_embed_device = function(c, one_step_cb) {
                 db.set_offline(self.device.id, set_offline_cb);
             }
 
-            delete embeds[self.embed_id];
+            delete embeds[self.device_id];
 
             after_exit();
 
@@ -222,7 +274,10 @@ exports.create_embed_device = function(c, one_step_cb) {
 
             if(device && device != self){
                 print_log("another device already logined, destroy it");
-                device.sock.destroy();
+                if(!device.is_cluster())
+                {
+                    device.sock.destroy();
+                }
                 delete embeds[self.device_id];
             }
         }
@@ -334,8 +389,6 @@ exports.create_embed_device = function(c, one_step_cb) {
 
         this.handle_end = function()
         {
-            print_log("socket end");
-
             remove_embed_device();
             self.sock.destroy();
         }
@@ -453,7 +506,7 @@ exports.create_embed_device = function(c, one_step_cb) {
                 var msg = {};
                 msg["proxy_id"] = self.proxy_id;
                 msg["device_id"] = self.device_id;
-                msg["server_id"] = cluster.worker.id;
+                msg["device"] = self.device;
                 msg["type"] = "login";
                 msg["to"] = "device";
 
@@ -623,7 +676,8 @@ exports.create_embed_device = function(c, one_step_cb) {
     return device;
 }
 
-var cluster_device = function(server_id, proxy_id, device_id){
+var cluster_device = function(server_id, proxy_id, device_id, device){
+    this.device = device;
     this.server_id = server_id;
     this.proxy_id = proxy_id;
     this.device_id = device_id;

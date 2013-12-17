@@ -125,15 +125,6 @@ function handleClient(c)
     sock.on('data', handle_data);
     sock.on('end', handle_end);
     sock.on('error', handle_error);
-
-    cluster.worker.on('message', function(msg){
-        if(msg["to"] == "device"){
-            embed_device.notify_msg(msg);
-        }
-        else if(msg["to"] == "all"){
-            embed_device.notify_msg(msg);
-        }
-    });
 }
 
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
@@ -166,6 +157,7 @@ if(cluster.isMaster){
         msg["from"] = -1;
         msg["type"] = "worker_exit";
         msg["to"] = "all";
+        msg["data"] = {};
         msg["data"]["worker"] = worker.id;
 
         Object.keys(cluster.workers).forEach(function(id){
@@ -187,6 +179,15 @@ if(cluster.isMaster){
     });
 }
 else{
+    cluster.worker.on('message', function(msg){
+        if(msg["to"] == "device"){
+            embed_device.notify_msg(msg);
+        }
+        else if(msg["to"] == "all"){
+            embed_device.notify_msg(msg);
+        }
+    });
+
     var server = net.createServer(handleClient);
     server.listen(port, function(){
         console.log("Welcome, Buffalo server started. Port " + port + ", server time " + (new Date()));
