@@ -7,6 +7,8 @@ var error_code = require("./error_code.js");
 var util = require('./util.js');
 var notification = require('./notification.js');
 var config = require('./config.js');
+var cluster = require('cluster');
+var native_util = require('util');
 
 exports.create_phone = function(c, one_step_cb) {
     var phone_constructor = function(){
@@ -23,11 +25,11 @@ exports.create_phone = function(c, one_step_cb) {
                 name = self.user.name;
             }
 
-            console.log("phone[%s]; ip[%s:%s]: %s", name, self.remoteAddress, self.remotePort, msg); 
+            console.log("worker[%s]; phone[%s]; ip[%s:%s]: %s", cluster.worker.id, name, self.remoteAddress, self.remotePort, msg); 
         }
 
         var write_data = function(buff){
-            console.log("response[%s]: %s", (new Date()), util.formatBuffer(buff));
+            print_log(native_util.format("response[%s]: %s", (new Date()), util.formatBuffer(buff)));
             self.sock.write(buff);
         }
 
@@ -42,9 +44,8 @@ exports.create_phone = function(c, one_step_cb) {
                 }
             }
 
-            console.log("phone client[%s:%s] removed, current phones: %d",
-                    self.remoteAddress, self.remotePort,
-                    phones.length);
+            print_log(native_util.format("phone removed, current phones: %d",
+                    phones.length));
         }
 
         var handle_protocal_error = function()
@@ -90,7 +91,7 @@ exports.create_phone = function(c, one_step_cb) {
                 self.one_step_cb(0);
             }
 
-            console.log("request[%s]: %s", (new Date()), util.formatBuffer(data, 10 + len));
+            print_log(native_util.format("request[%s]: %s", (new Date()), util.formatBuffer(data, 10 + len)));
 
             var msg = {};
             var type = data[start + 1]; 

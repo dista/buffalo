@@ -5,6 +5,7 @@ var config = require('./config.js');
 //var db = require('./db.js');
 var db = require('./mysqldb.js');
 var cluster = require('cluster');
+var native_util = require('util');
 
 var embeds = {};
 var proxies = {};
@@ -178,6 +179,27 @@ exports.notify_msg = function(msg){
             var worker = msg["data"]["worker"];
             remove_device_by_worker(worker);
         }
+        else if(type == "worker_started"){
+            var worker = msg["data"]["worker"];
+            on_worker_started(msg);
+        }
+    }
+}
+
+var on_worker_started = function(msg){
+    for(var k in embeds){
+        var device = embeds[k];
+
+        if(device && !device.is_cluster()){
+            var ret = {};
+            ret["proxy_id"] = device.proxy_id;
+            ret["device_id"] = device.device_id;
+            ret["device"] = device.device;
+            ret["type"] = "login";
+            ret["to"] = "device";
+
+            send_msg_to_master(ret);
+        }
     }
 }
 
@@ -228,7 +250,7 @@ exports.create_embed_device = function(c, one_step_cb) {
         }
 
         var write_data = function(buff){
-            console.log("response[%s]: %s", (new Date()), util.formatBuffer(buff));
+            print_log(native_util.format("response[%s]: %s", (new Date()), util.formatBuffer(buff)));
             self.sock.write(buff);
         }
 
@@ -264,9 +286,8 @@ exports.create_embed_device = function(c, one_step_cb) {
 
             after_exit();
 
-            console.log("embed_device client[%s:%s] removed, current embed_devices: %d",
-                    self.remoteAddress, self.remotePort,
-                    Object.keys(embeds).length);
+            print_log(native_util.format("embed_device client removed, current embed_devices: %d",
+                    Object.keys(embeds).length));
         }
 
         var rm_another_logined = function(){
@@ -423,7 +444,7 @@ exports.create_embed_device = function(c, one_step_cb) {
                 self.one_step_cb(0);
             }
 
-            console.log("request[%s]: %s", (new Date()), util.formatBuffer(data, 10 + len));
+            print_log(native_util.format("request[%s]: %s", (new Date()), util.formatBuffer(data, 10 + len)));
 
             var msg = {};
             var type = data[start + 1]; 

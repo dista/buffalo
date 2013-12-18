@@ -172,7 +172,21 @@ if(cluster.isMaster){
 
         var restart_worker = function(){
             console.log('worker ' + worker.process.pid + ' died, restarting...');
-            cluster.fork();
+            var new_worker = cluster.fork();
+            setTimeout(function(){
+                var msg = {};
+                msg["from"] = -1;
+                msg["type"] = "worker_started";
+                msg["to"] = "all";
+                msg["data"] = {};
+                msg["data"]["worker"] = new_worker.id;
+                Object.keys(cluster.workers).forEach(function(id){
+                    if(cluster.workers[id].id != new_worker.id){
+                        cluster.workers[id].send(msg); 
+                    }
+                });
+                },
+                100);
         }
 
         setTimeout(restart_worker, 5000);
