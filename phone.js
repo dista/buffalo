@@ -656,9 +656,13 @@ exports.create_phone = function(c, one_step_cb) {
 
                     var embed = embed_device.find_by_device_id(device_id);
                     if(embed){
+                        /*
                         for(var i = 0; i < rows.length; i++){
                             embed.del_time(rows[i].sid, util.dummy);
                         }
+                        */
+
+                        embed.del_time(100, util.dummy);
 
                         embed.lock(0, util.dummy);
                         embed.control(0, 0, util.dummy);
