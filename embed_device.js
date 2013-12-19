@@ -19,6 +19,14 @@ var find_by_proxy_id = function(proxy_id){
     return proxies[proxy_id];
 }
 
+if(config.debug_cluster){
+    setInterval(function(){
+        if(cluster.worker){
+            console.log("worker[%s] length [%d]", cluster.worker.id, Object.keys(embeds).length);
+        }
+    }, 60000);
+}
+
 var build_general_msg_cluster = function(msg, type, result, code){
     var ret = {};
     ret["to"] = "device";
@@ -234,6 +242,7 @@ var find_device_not_self = function(id, obj){
 
 var send_msg_to_master = function(msg){
     msg["from"] = cluster.worker.id;
+
     cluster.worker.send(msg);
 }
 

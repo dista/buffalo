@@ -172,14 +172,11 @@ if(cluster.isMaster){
                 }
             });
         }
-
-        cluster.on('exit', function(worker, code, signal) {
-            send_worker_exit_msg(worker);
-
-            var restart_worker = function(){
-                console.log('worker ' + worker.process.pid + ' died, restarting...');
-                var new_worker = cluster.fork();
-                setTimeout(function(){
+        
+        cluster.on('online', function(new_worker){
+            // the worker is bring back
+            var send_online_to_workers = function(){
+                if(new_worker.old_id){
                     var msg = {};
                     msg["from"] = -1;
                     msg["type"] = "worker_started";
@@ -191,11 +188,23 @@ if(cluster.isMaster){
                             cluster.workers[id].send(msg); 
                         }
                     });
-                    },
-                    100);
+                }
             }
 
-            setTimeout(restart_worker, 5000);
+            send_online_to_workers();
+        });
+
+        cluster.on('exit', function(worker, code, signal) {
+            send_worker_exit_msg(worker);
+
+            var restart_worker = function(){
+                console.log('worker [' + worker.id + '][' + worker.process.pid + '] died, restarting...');
+                var new_worker = cluster.fork();
+                new_worker.on('message', message_handler);
+                new_worker.old_id = worker.id;
+            }
+
+            restart_worker();
         });
     }
 
