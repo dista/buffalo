@@ -1,6 +1,6 @@
 var net = require("net");
 var util = require("../util.js");
-var port = 7000;
+var port = 6000;
 var ip = "115.29.164.141"
 
 var phone_test = function(name, device){
@@ -40,8 +40,11 @@ var phone_client = net.connect(port, ip, function(){
 
     phone_client.on('data', function(data){
         if(data[1] == 0x11){
-            setInterval(function(){send_control(device, 1, 20);}, 2000);
-            setInterval(function(){send_query_status(device);}, 3000);
+            //setInterval(function(){send_control(device, 1, 20);}, 2000);
+            //setInterval(function(){send_query_status(device);}, 3000);
+            //send_del_delay(device);
+            //setInterval(function(){send_del_time(device, 1);}, 5000);
+            send_del_time(device, 1);
         }
 
         //console.log(new Date());
@@ -244,6 +247,6 @@ var send_check_email = function(name){
 }
 }
 
-for(var i = 0 ; i < 100; i++){
+for(var i = 0 ; i < 1; i++){
     phone_test("dista" + i, "RELEASE1" + util.formatNumber(2000+i, 4));
 }

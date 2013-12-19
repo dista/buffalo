@@ -1,6 +1,6 @@
 var net = require("net");
 var util = require("../util.js");
-var port = 7000;
+var port = 6000;
 var posix = require('posix');
 var ip = "115.29.164.141"
 
@@ -8,16 +8,14 @@ var device_test = function(device_id){
     var device_client = net.connect(port, ip, function(){
         //send_heartbeat();
         send_login(device_id, new Buffer([0x11, 0x22, 0x33, 0x44, 0x55, 0x66]));
+        /*
         setInterval(function(){
             send_heartbeat();
         }, 50000);
+        */
         //setTimeout(function(){send_status(device_id, 1, 123, 124, 129, 1);}, 500);
         //setTimeout(function(){send_sync_time(device_id);}, 500);
 
-        device_client.on('error', function(err){
-            console.log(err);
-        });
-        
         device_client.on('data', function(data){
             console.log(data);
             var type = data[1];
@@ -56,6 +54,18 @@ var device_test = function(device_id){
         });
     });
 
+    device_client.on('error', function(err){
+        console.log(err);
+    });
+
+    device_client.on('close', function(has_error){
+        console.log('close');
+        device_test(device_id);
+    });
+
+    device_client.on('end', function(){
+    });
+        
     var send_status_response = function(msg,
                                         code,
                                         state,
@@ -148,7 +158,7 @@ var device_test = function(device_id){
 }
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
-for(var i = 199; i < 200; i++)
+for(var i = 2000; i < 2001; i++)
 {
     device_test("RELEASE1" + util.formatNumber(i, 4));
 }
