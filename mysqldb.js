@@ -346,6 +346,10 @@ exports.set_online = function(id){
     query_wrapper("UPDATE device set online=1 WHERE id=?", [id]);
 }
 
+exports.set_all_offline = function(cb){
+    query_wrapper("UPDATE device set online=0", cb);
+}
+
 exports.set_locked = function(id, locked){
     query_wrapper("UPDATE device set locked=? WHERE id=?", [locked, id]);
 }

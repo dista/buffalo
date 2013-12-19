@@ -236,6 +236,10 @@ exports.set_online = function(id){
     db.run("UPDATE device set online=1 WHERE id=?", id);
 }
 
+exports.set_all_offline = function(cb){
+    db.run("UPDATE device set online=0", cb);
+}
+
 exports.set_locked = function(id, locked){
     db.run("UPDATE device set locked=? WHERE id=?", locked, id);
 }

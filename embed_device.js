@@ -42,6 +42,10 @@ var send_general_msg_cluster = function(msg, type, result, code){
     send_msg_to_master(ret);
 }
 
+exports.init = function(cb){
+    db.set_all_offline(cb);
+}
+
 exports.notify_msg = function(msg){
     var from = msg["from"];
 

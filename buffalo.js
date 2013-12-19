@@ -3,7 +3,7 @@ var embed_device = require('./embed_device.js');
 var phone = require('./phone.js');
 var posix = require('posix');
 var cluster = require('cluster');
-var port = 6000;
+var port = 7000;
 
 function handleClient(c)
 {
@@ -131,9 +131,18 @@ posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
 var numCPUs = require('os').cpus().length;
 if(cluster.isMaster){
-    for (var i = 0; i < numCPUs; i++) {
-        cluster.fork();
+    var after_init = function(err){
+        if(err){
+            console.log("init device failed");
+            return;
+        }
+
+        for (var i = 0; i < numCPUs; i++) {
+            cluster.fork();
+        }
     }
+
+    embed_device.init(after_init);
 
     function message_handler(msg) {
         if("server_id" in msg){
