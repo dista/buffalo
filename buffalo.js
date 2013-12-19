@@ -3,7 +3,7 @@ var embed_device = require('./embed_device.js');
 var phone = require('./phone.js');
 var posix = require('posix');
 var cluster = require('cluster');
-var port = 7000;
+var port = 6000;
 
 function handleClient(c)
 {
@@ -140,66 +140,66 @@ if(cluster.isMaster){
         for (var i = 0; i < numCPUs; i++) {
             cluster.fork();
         }
-    }
 
-    embed_device.init(after_init);
-
-    function message_handler(msg) {
-        if("server_id" in msg){
-            cluster.workers[msg["server_id"]].send(msg);
+        function message_handler(msg) {
+            if("server_id" in msg){
+                cluster.workers[msg["server_id"]].send(msg);
+            }
+            else{
+                Object.keys(cluster.workers).forEach(function(id){
+                    if(cluster.workers[id].id != msg.from){
+                        cluster.workers[id].send(msg); 
+                    }
+                });
+            }
         }
-        else{
+
+        Object.keys(cluster.workers).forEach(function(id) {
+            cluster.workers[id].on('message', message_handler);
+        });
+
+        var send_worker_exit_msg = function(worker){
+            var msg = {};
+            msg["from"] = -1;
+            msg["type"] = "worker_exit";
+            msg["to"] = "all";
+            msg["data"] = {};
+            msg["data"]["worker"] = worker.id;
+
             Object.keys(cluster.workers).forEach(function(id){
-                if(cluster.workers[id].id != msg.from){
+                if(cluster.workers[id].id != worker.id){
                     cluster.workers[id].send(msg); 
                 }
             });
         }
-    }
 
-    Object.keys(cluster.workers).forEach(function(id) {
-        cluster.workers[id].on('message', message_handler);
-    });
+        cluster.on('exit', function(worker, code, signal) {
+            send_worker_exit_msg(worker);
 
-    var send_worker_exit_msg = function(worker){
-        var msg = {};
-        msg["from"] = -1;
-        msg["type"] = "worker_exit";
-        msg["to"] = "all";
-        msg["data"] = {};
-        msg["data"]["worker"] = worker.id;
-
-        Object.keys(cluster.workers).forEach(function(id){
-            if(cluster.workers[id].id != worker.id){
-                cluster.workers[id].send(msg); 
+            var restart_worker = function(){
+                console.log('worker ' + worker.process.pid + ' died, restarting...');
+                var new_worker = cluster.fork();
+                setTimeout(function(){
+                    var msg = {};
+                    msg["from"] = -1;
+                    msg["type"] = "worker_started";
+                    msg["to"] = "all";
+                    msg["data"] = {};
+                    msg["data"]["worker"] = new_worker.id;
+                    Object.keys(cluster.workers).forEach(function(id){
+                        if(cluster.workers[id].id != new_worker.id){
+                            cluster.workers[id].send(msg); 
+                        }
+                    });
+                    },
+                    100);
             }
+
+            setTimeout(restart_worker, 5000);
         });
     }
 
-    cluster.on('exit', function(worker, code, signal) {
-        send_worker_exit_msg(worker);
-
-        var restart_worker = function(){
-            console.log('worker ' + worker.process.pid + ' died, restarting...');
-            var new_worker = cluster.fork();
-            setTimeout(function(){
-                var msg = {};
-                msg["from"] = -1;
-                msg["type"] = "worker_started";
-                msg["to"] = "all";
-                msg["data"] = {};
-                msg["data"]["worker"] = new_worker.id;
-                Object.keys(cluster.workers).forEach(function(id){
-                    if(cluster.workers[id].id != new_worker.id){
-                        cluster.workers[id].send(msg); 
-                    }
-                });
-                },
-                100);
-        }
-
-        setTimeout(restart_worker, 5000);
-    });
+    embed_device.init(after_init);
 }
 else{
     cluster.worker.on('message', function(msg){
