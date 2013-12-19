@@ -664,8 +664,8 @@ exports.create_phone = function(c, one_step_cb) {
 
                         embed.del_time(100, util.dummy);
 
-                        embed.lock(0, util.dummy);
-                        embed.control(0, 0, util.dummy);
+                        //embed.lock(0, util.dummy);
+                        //embed.control(0, 0, util.dummy);
                     }
 
                     db.del_from_time(row.id, del_from_time_cb);
