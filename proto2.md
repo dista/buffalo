@@ -1,4 +1,7 @@
-# 控制协议
+# 设备控制协议
+
+## 概念
+
 
 ## 数据类型及名词解释
 
@@ -8,8 +11,10 @@
   * `int`         4 bytes
   * `bytes`      n bytes
   * `string`      4 bytes长度字段 + string的实际数据
-  * `device_id`   16 bytes 设备ID, 第一个字符为设备的类型信息, 2-16字符为实际ID
-  第一个字符的含义如下表
+  * `device_id`   16 bytes 设备ID, byte 0设备的类型信息, byte 1-2为vendor编号，2-3为vendor设备型号编号, 剩下的为设备
+                  实际ID
+
+  第一个byte的含义如下表
   <table>
   <tr>
     <th>0</th>
@@ -219,7 +224,33 @@
 
 #### 返回payload为
 各种设备返回的信息都不同，需要根据设备的类型进行解析
+这个可以根据具体设备进行定义, 如果该设备为温度传感器，则返回
+<table>
+  <tr>
+    <th>温度</th>
+  </tr>
+  <tr>
+    <td>short</td>
+  </tr>
+</table>
 
+### 控制设备
+#### 请求payload为
+
+<table>
+  <tr>
+    <th>设备ID</th>
+    <th>控制信息</th>
+  </tr>
+  <tr>
+    <td>device_id</td>
+    <td>bytes</td>
+  </tr>
+</table>
+`控制信息`是一个字符串，每种设备，它的定义都不相同
+
+#### 返回payload为
+除了头信息，不需要返回任何字段
 
 ### 添加设备
 
