@@ -25,9 +25,8 @@
     <td>设备子类型(红外控制器，灯光等等)</td>
   </tr>
   </table>
-  * `remote_contoller_type` 1 byte 遥控器id, 0-20是特定类型遥控器， 20之后为自定义类型遥控器
+  * `remote_contoller_type` short 如果是0,则是自定义遥控器,否则为特定型号的遥控器
   * `bit X` 从左往右来规定是哪个bit, bit X表示从左往右第X位, X从0开始
-  * `remote_controller_id` 4 bytes, 手机修改，删除遥控器时需要向server提供的id, 这个ID在添加遥控器时由server返回
 
 
 ## 信息格式
@@ -146,15 +145,11 @@
    <tr>
       <th>遥控器ID</th>
       <th>遥控器类型</th>
-      <th>厂商</th>
-      <th>型号</th>
       <th>遥控器属性</th>
    </tr>
    <tr>
-      <td>remote_controller_id</td>
+      <td>byte</td>
       <td>remote_controller_type</td>
-      <td>string</td>
-      <td>string</td>
       <td>short</td>
    </tr>
 </table>
@@ -250,9 +245,285 @@
 `控制信息`是一个字符串，每种设备，它的定义都不相同
 
 #### 返回payload为
-除了头信息，不需要返回任何字段
+空
 
+### 添加遥控器
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+    <th>遥控器类型</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+    <td>remote_contoller_type</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+### 删除遥控器
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+### 为特定类型遥控器添加自定义按键
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+    <th>按键id</th>
+    <th>名称</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+    <td>short</td>
+    <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+### 为特定类型遥控器修改自定义按键
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+    <th>按键id</th>
+    <th>名称</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+    <td>short</td>
+    <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+### 遥控器删除自定义按键
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+    <th>按键id</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+    <td>short</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+
+
+### 上传图片
+上传图片的格式为png
+
+HTTP POST:
+    
+    http://$server_host[:$port]/buffalo/upload/pic
+    $filename = "pic"
+    
+返回: 上传后图片的$id, 之后手机就可以使用该$id拼出上传后文件的地址
+    
+    http://$server_host[:$port]/buffalo/static/$id.png
+    
 ### 添加设备
+#### 请求payload为
+
+<table>
+  <tr>
+    <th>房间ID</th>
+    <th>设备ID</th>
+    <th>主设备ID</th>
+    <th>设备名称</th>
+    <th>是否用预设图片</th>
+    <th>图片ID</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>device_id</td>
+    <td>device_id/none</td>
+    <td>string</td>
+    <td>bool</td>
+    <td>int</td>
+  </tr>
+</table>
+
+如果该设备是主设备,则主设备ID不需要填写; 如果是从设备,则主设备ID必须填写
+
+#### 返回payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+  </tr>
+  <tr>
+    <td>int</td>
+  </tr>
+</table>
 
 ### 删除设备
+#### 请求payload为
 
+<table>
+  <tr>
+    <th>设备标识</th>
+  </tr>
+  <tr>
+    <td>int</td>
+  </tr>
+</table>
+
+#### 返回payload为
+空
+
+### 修改设备
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>设备名称</th>
+    <th>设备图片ID</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>string</td>
+    <td>int</td>
+  </tr>
+</table>
+
+#### 返回payload为
+空
+
+### 控制设备
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>控制指令</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>bytes</td>
+  </tr>
+</table>
+
+`控制指令`的第一个字符为子控制指令标识, 剩余数据为控制指令本身
+
+1. 学习按键的`控制指令`
+<table>
+  <tr>
+    <th>遥控器id</th>
+    <th>按键id</th>
+  </tr>
+  <tr>
+    <td>byte</td>
+    <td>int</td>
+  </tr>
+</table>
+
+2. 发送红外指令
+<table>
+  <tr>
+    <th>红外信号的标识</th>
+  </tr>
+  <tr>
+    <td>int</td>
+  </tr>
+</table>
+
+3. 删除按键红外信号
+<table>
+  <tr>
+    <th>遥控器id</th>
+    <th>按键id</th>
+  </tr>
+  <tr>
+    <td>byte</td>
+    <td>int</td>
+  </tr>
+</table>
+
+
+#### 返回payload为
+1. 学习按键的返回
+<table>
+  <tr>
+    <th>红外信号的标识</th>
+  </tr>
+  <tr>
+    <td>int</td>
+  </tr>
+</table>
+2. 空
+
+3. 空
+
+
+## 设备->服务器
+
+### 设备登录
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备id</th>
+  </tr>
+  <tr>
+    <td>device_id</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+### 设备ping
+#### 请求payload为
+空
+#### 返回payload为
+空
+
+### 设备状态汇报
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备ID</th>
+    <th>状态</th>
+  </tr>
+  <tr>
+    <td>device_id</td>
+    <th>byte</td>
+  </tr>
+</table>
+
+`状态`: 0标识offline, 1标识online
+
+### 控制返回
+1. 学习红外
+<table>
+  <tr>
+    <th>控制子类型</th>
+    <th>红外信号</th>
+  </tr>
+  <tr>
+    <td>byte</td>
+    <td>bytes</td>
+  </tr>
+</table>
