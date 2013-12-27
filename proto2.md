@@ -69,6 +69,30 @@
   <tr><td>int</td></tr>
 </table>
 
+可能的错误码有
+<table>
+  <tr>
+    <th>错误码</th>
+    <th>含义</th>
+  </tr>
+  <tr>
+    <td>0x01</td>
+    <td>不存在</td>
+  </tr>
+  <tr>
+    <td>0x02</td>
+    <td>超时</td>
+  </tr>
+  <tr>
+    <td>0x03</td>
+    <td>Server内部错误</td>
+  </tr>
+  <tr>
+    <td>0x04</td>
+    <td>已经被占用</td>
+  </tr>
+</table>
+
 ## 手机->服务器
 
 ### 获取手机的配置(0x80)
@@ -539,6 +563,52 @@ HTTP POST:
 2. 空
 
 3. 空
+
+
+### 注册用户(0x90)
+#### 请求payload为
+<table>
+  <tr>
+    <th>email</th>
+    <th>密码</th>
+  </tr>
+  <tr>
+    <td>string</td>
+    <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+## 修改密码(0x91)
+#### 请求payload为
+<table>
+  <tr>
+    <th>email</th>
+    <th>原密码</th>
+    <th>新密码</th>
+  </tr>
+  <tr>
+    <td>string</td>
+    <td>string</td>
+    <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+## 找回密码(0x91)
+#### 请求payload为
+<table>
+  <tr>
+    <th>email</th>
+  </tr>
+  <tr>
+    <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+空
 
 
 ## 设备->服务器
