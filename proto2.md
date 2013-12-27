@@ -68,7 +68,7 @@
 
 ## 手机->服务器
 
-### 获取手机的配置
+### 获取手机的配置(0x80)
 <table>
   <tr>
     <th>震动</th>
@@ -80,7 +80,25 @@
   </tr>
 </table>
 
-### 获取房间信息
+### 修改房间信息(0x81)
+#### 请求payload为
+
+<table>
+  <tr>
+    <th>房间ID</th>
+    <th>房间名称</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>string</td>
+  </tr>
+</table>
+
+#### 返回payload为
+空
+
+
+### 获取房间信息(0x82)
 获取房间的设备信息，如果有红外控制器，并且为这个红外控制器创建了遥控器，也返回这些遥控器的信息
 房间信息定义为
 
@@ -204,7 +222,7 @@
 </table>
 `键类型`的意思是：会有各种预定义的键，比如圆的，方的，各种大小的，每个都会有个类型标识
 
-### 获取设备信息
+### 获取设备信息(0x83)
 可以获取如温度等信息，这些信息需要向设备查询
 #### 请求payload为
 
@@ -229,7 +247,7 @@
   </tr>
 </table>
 
-### 控制设备
+### 控制设备(0x84)
 #### 请求payload为
 
 <table>
@@ -247,7 +265,7 @@
 #### 返回payload为
 空
 
-### 添加遥控器
+### 添加遥控器(0x85)
 #### 请求payload为
 <table>
   <tr>
@@ -264,7 +282,7 @@
 #### 返回payload为
 空
 
-### 删除遥控器
+### 删除遥控器(0x86)
 #### 请求payload为
 <table>
   <tr>
@@ -279,51 +297,7 @@
 #### 返回payload为
 空
 
-### 为特定类型遥控器添加自定义按键
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>遥控器id</th>
-    <th>按键id</th>
-    <th>名称</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>byte</td>
-    <td>short</td>
-    <td>string</td>
-  </tr>
-</table>
-#### 返回payload为
-空
-
-### 为自定义类型遥控器添加自定义按键
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>遥控器id</th>
-    <th>按键id</th>
-    <th>名称</th>
-    <th>键离屏幕中心点x</th>
-    <th>键离屏幕中心点y</th>
-    <th>键类型</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>byte</td>
-    <td>short</td>
-    <td>string</td>
-    <td>int</td>
-    <td>int</td>
-    <td>short</td>
-  </tr>
-</table>
-#### 返回payload为
-空
-
-### 为特定类型遥控器修改自定义按键
+### 为特定类型遥控器添加自定义按键(0x87)
 #### 请求payload为
 <table>
   <tr>
@@ -342,7 +316,7 @@
 #### 返回payload为
 空
 
-### 为自定义类型遥控器修改自定义按键
+### 为自定义类型遥控器添加自定义按键(0x88)
 #### 请求payload为
 <table>
   <tr>
@@ -367,7 +341,51 @@
 #### 返回payload为
 空
 
-### 遥控器删除自定义按键
+### 为特定类型遥控器修改自定义按键(0x89)
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+    <th>按键id</th>
+    <th>名称</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+    <td>short</td>
+    <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+### 为自定义类型遥控器修改自定义按键(0x8a)
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+    <th>按键id</th>
+    <th>名称</th>
+    <th>键离屏幕中心点x</th>
+    <th>键离屏幕中心点y</th>
+    <th>键类型</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+    <td>short</td>
+    <td>string</td>
+    <td>int</td>
+    <td>int</td>
+    <td>short</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+### 遥控器删除自定义按键(0x8b)
 #### 请求payload为
 <table>
   <tr>
@@ -398,7 +416,7 @@ HTTP POST:
     
     http://$server_host[:$port]/buffalo/static/$id.png
     
-### 添加设备
+### 添加设备(0x8c)
 #### 请求payload为
 
 <table>
@@ -432,7 +450,7 @@ HTTP POST:
   </tr>
 </table>
 
-### 删除设备
+### 删除设备(0x8d)
 #### 请求payload为
 
 <table>
@@ -447,7 +465,7 @@ HTTP POST:
 #### 返回payload为
 空
 
-### 修改设备
+### 修改设备(0x8e)
 #### 请求payload为
 <table>
   <tr>
@@ -465,7 +483,7 @@ HTTP POST:
 #### 返回payload为
 空
 
-### 控制设备
+### 控制设备(0x8f)
 <table>
   <tr>
     <th>设备标识</th>
@@ -479,7 +497,7 @@ HTTP POST:
 
 `控制指令`的第一个字符为子控制指令标识, 剩余数据为控制指令本身
 
-1. 学习按键的`控制指令`
+1. 学习按键的`控制指令`(0x10)
 <table>
   <tr>
     <th>遥控器id</th>
@@ -491,7 +509,7 @@ HTTP POST:
   </tr>
 </table>
 
-2. 发送红外指令
+2. 发送红外指令(0x11)
 <table>
   <tr>
     <th>红外信号的标识</th>
@@ -501,7 +519,7 @@ HTTP POST:
   </tr>
 </table>
 
-3. 删除按键红外信号
+3. 删除按键红外信号(0x12)
 <table>
   <tr>
     <th>遥控器id</th>
@@ -531,7 +549,7 @@ HTTP POST:
 
 ## 设备->服务器
 
-### 设备登录
+### 设备登录(0xa0)
 #### 请求payload为
 <table>
   <tr>
@@ -544,13 +562,13 @@ HTTP POST:
 #### 返回payload为
 空
 
-### 设备ping
+### 设备ping(0xa1)
 #### 请求payload为
 空
 #### 返回payload为
 空
 
-### 设备状态汇报
+### 设备状态汇报(0xa2)
 #### 请求payload为
 <table>
   <tr>
@@ -565,8 +583,8 @@ HTTP POST:
 
 `状态`: 0标识offline, 1标识online
 
-### 控制返回
-1. 学习红外
+### 控制返回(0xa3)
+1. 学习红外(0x10)
 <table>
   <tr>
     <th>控制子类型</th>
@@ -574,6 +592,16 @@ HTTP POST:
   </tr>
   <tr>
     <td>byte</td>
+    <td>bytes</td>
+  </tr>
+</table>
+
+### 获取设备状态返回(0xa4)
+<table>
+  <tr>
+    <th>状态信息</th>
+  </tr>
+  <tr>
     <td>bytes</td>
   </tr>
 </table>
