@@ -298,6 +298,31 @@
 #### 返回payload为
 空
 
+### 为自定义类型遥控器添加自定义按键
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+    <th>按键id</th>
+    <th>名称</th>
+    <th>键离屏幕中心点x</th>
+    <th>键离屏幕中心点y</th>
+    <th>键类型</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+    <td>short</td>
+    <td>string</td>
+    <td>int</td>
+    <td>int</td>
+    <td>short</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
 ### 为特定类型遥控器修改自定义按键
 #### 请求payload为
 <table>
@@ -312,6 +337,31 @@
     <td>byte</td>
     <td>short</td>
     <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+空
+
+### 为自定义类型遥控器修改自定义按键
+#### 请求payload为
+<table>
+  <tr>
+    <th>设备标识</th>
+    <th>遥控器id</th>
+    <th>按键id</th>
+    <th>名称</th>
+    <th>键离屏幕中心点x</th>
+    <th>键离屏幕中心点y</th>
+    <th>键类型</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>byte</td>
+    <td>short</td>
+    <td>string</td>
+    <td>int</td>
+    <td>int</td>
+    <td>short</td>
   </tr>
 </table>
 #### 返回payload为
