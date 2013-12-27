@@ -27,6 +27,9 @@
   </table>
   * `remote_contoller_type` short 如果是0,则是自定义遥控器,否则为特定型号的遥控器
   * `bit X` 从左往右来规定是哪个bit, bit X表示从左往右第X位, X从0开始
+  
+
+各种整形以`big-endian`进行编码
 
 
 ## 信息格式
