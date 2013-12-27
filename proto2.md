@@ -236,16 +236,7 @@
 </table>
 
 #### 返回payload为
-各种设备返回的信息都不同，需要根据设备的类型进行解析
-这个可以根据具体设备进行定义, 如果该设备为温度传感器，则返回
-<table>
-  <tr>
-    <th>温度</th>
-  </tr>
-  <tr>
-    <td>short</td>
-  </tr>
-</table>
+各种设备返回的信息都不同，具体见下面设备返回
 
 ### 控制设备(0x84)
 #### 请求payload为
@@ -603,5 +594,27 @@ HTTP POST:
   </tr>
   <tr>
     <td>bytes</td>
+  </tr>
+</table>
+每种状态都是key, value形式
+<table>
+  <tr>
+    <th>名称(key)</th>
+    <th>值(value)</th>
+  </tr>
+  <tr>
+    <td>string</td>
+    <td>depends on key</td>
+  </tr>
+</table>
+比如如果是温度,就返回
+<table>
+  <tr>
+    <th>名称(key)</th>
+    <th>值(value)</th>
+  </tr>
+  <tr>
+    <td>temperature</td>
+    <td>30(short)</td>
   </tr>
 </table>
