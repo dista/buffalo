@@ -282,6 +282,49 @@
   </tr>
 </table>
 `控制信息`是一个字符串，每种设备，它的定义都不相同
+下面定义下这个项目会用到的控制指令
+1. 锁定设备(0x01)
+<table>
+    <tr>
+    <th>控制命令</th>
+    <th>是否锁定</th>
+  </tr>
+  <tr>
+    <td>short</td>
+    <td>byte</td>
+  </tr>
+</table>
+2. 组合控制命令(0x02)
+<table>
+  <tr>
+    <th>控制命令</th>
+    <th>组数</th>
+    <th>单个命令</th>
+  </tr>
+  <tr>
+    <td>short</td>
+    <td>byte</td>
+    <td>bytes</td>
+  </tr>
+</table>
+
+`单个命令`的定义为
+<table>
+  <tr>
+    <th>控制命令</th>
+    <th>控制命令参数长度</th>
+    <th>控制命令参数</th>
+    <th>额外参数长度</th>
+    <th>额外参数</th>
+  </tr>
+   <tr>
+    <td>short</td>
+    <td>int</td>
+    <td>bytes</td>
+    <td>int</td>
+    <td>bytes</td>
+  </tr>
+</table>
 
 #### 返回payload为
 空
@@ -437,41 +480,27 @@ HTTP POST:
     
     http://$server_host[:$port]/buffalo/static/$id.png
     
-### 添加设备(0x8c)
+### 关联设备(0x8c)
 #### 请求payload为
 
 <table>
   <tr>
-    <th>房间ID</th>
     <th>设备ID</th>
     <th>主设备ID</th>
-    <th>设备名称</th>
-    <th>是否用预设图片</th>
-    <th>图片ID</th>
   </tr>
   <tr>
     <td>int</td>
     <td>device_id</td>
     <td>device_id/none</td>
-    <td>string</td>
-    <td>bool</td>
-    <td>int</td>
   </tr>
 </table>
 
 如果该设备是主设备,则主设备ID不需要填写; 如果是从设备,则主设备ID必须填写
 
 #### 返回payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-  </tr>
-  <tr>
-    <td>int</td>
-  </tr>
-</table>
+空
 
-### 删除设备(0x8d)
+### 解除关联设备(0x8d)
 #### 请求payload为
 
 <table>
@@ -479,7 +508,7 @@ HTTP POST:
     <th>设备标识</th>
   </tr>
   <tr>
-    <td>int</td>
+    <td>device_id</td>
   </tr>
 </table>
 
@@ -613,6 +642,77 @@ HTTP POST:
 #### 返回payload为
 空
 
+## 用户登录(0x92)
+#### 请求payload为
+<table>
+  <tr>
+    <th>email</th>
+    <th>密码</th>
+  </tr>
+  <tr>
+    <td>string</td>
+    <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+<table>
+  <tr>
+    <th>是否改IP</th>
+    <th>ip地址</th>
+    <th>设备数量</th>
+    <th>单个设备状态描述</th>
+  </tr>
+  <tr>
+    <td>bool</td>
+    <td>ip/none</td>
+    <td>int</td>
+    <td>bytes</td>
+  </tr>
+</table>
+
+`单个设备状态描述`的定义为
+<table>
+  <tr>
+    <th>设备ID</th>
+    <th>设备状态长度</th>
+    <th>设备状态</th>
+  </tr>
+  <tr>
+    <td>device_id</td>
+    <td>int</td>
+    <td>bytes</td>
+  </tr>
+</table>
+`设备状态` 在红外项目里面的定义为
+<table>
+  <tr>
+    <th>温度</th>
+    <th>是否锁定</th>
+  </tr>
+  <tr>
+    <td>short</td>
+    <td>bool</td>
+  </tr>
+</table>
+
+### 用户退出(0x93)
+#### 请求payload为
+空
+#### 返回payload为
+空
+
+### 检查邮箱(0x94)
+#### 请求payload为
+<table>
+  <tr>
+    <th>email</th>
+  </tr>
+  <tr>
+    <td>string</td>
+  </tr>
+</table>
+#### 返回payload为
+空
 
 ## 设备->服务器
 
