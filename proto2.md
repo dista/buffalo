@@ -465,20 +465,6 @@
 </table>
 #### 返回payload为
 空
-
-
-
-### 上传图片
-上传图片的格式为png
-
-HTTP POST:
-    
-    http://$server_host[:$port]/buffalo/upload/pic
-    $filename = "pic"
-    
-返回: 上传后图片的$id, 之后手机就可以使用该$id拼出上传后文件的地址
-    
-    http://$server_host[:$port]/buffalo/static/$id.png
     
 ### 关联设备(0x8c)
 #### 请求payload为
@@ -487,11 +473,12 @@ HTTP POST:
   <tr>
     <th>设备ID</th>
     <th>主设备ID</th>
+    <th>时区</th>
   </tr>
   <tr>
-    <td>int</td>
     <td>device_id</td>
     <td>device_id/none</td>
+    <td>byte, 最高为bit为正负，剩余bits为时区值</td>
   </tr>
 </table>
 
