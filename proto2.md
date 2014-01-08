@@ -142,94 +142,98 @@
   </tr>
 </table>
 下面定义下这个项目会用到的控制指令
+
 1. 锁定设备(0x01)
-<table>
+  <table>
+      <tr>
+      <th>控制命令</th>
+      <th>长度</th>
+      <th>是否锁定</th>
+    </tr>
     <tr>
-    <th>控制命令</th>
-    <th>长度</th>
-    <th>是否锁定</th>
-  </tr>
-  <tr>
-    <td>short</td>
-    <td>int</td>
-    <td>byte</td>
-  </tr>
-</table>
+      <td>short</td>
+      <td>int</td>
+      <td>byte</td>
+    </tr>
+  </table>
+
 2. 组合控制命令(0x02)
-<table>
-  <tr>
-    <th>控制命令</th>
-    <th>长度</th>
-    <th>组数</th>
-    <th>单个命令</th>
-  </tr>
-  <tr>
-    <td>short</td>
-    <td>int</td>
-    <td>byte</td>
-    <td>bytes</td>
-  </tr>
-</table>
+  <table>
+    <tr>
+      <th>控制命令</th>
+      <th>长度</th>
+      <th>组数</th>
+      <th>单个命令</th>
+    </tr>
+    <tr>
+      <td>short</td>
+      <td>int</td>
+      <td>byte</td>
+      <td>bytes</td>
+    </tr>
+  </table>
 
-`单个命令`的定义为
-<table>
-  <tr>
-    <th>控制命令</th>
-    <th>控制命令参数长度</th>
-    <th>控制命令参数</th>
-    <th>额外参数长度</th>
-    <th>额外参数</th>
-  </tr>
-   <tr>
-    <td>short</td>
-    <td>int</td>
-    <td>bytes</td>
-    <td>int</td>
-    <td>bytes</td>
-  </tr>
-</table>
-
+  `单个命令`的定义为
+  <table>
+    <tr>
+      <th>控制命令</th>
+      <th>控制命令参数长度</th>
+      <th>控制命令参数</th>
+      <th>额外参数长度</th>
+      <th>额外参数</th>
+    </tr>
+     <tr>
+      <td>short</td>
+      <td>int</td>
+      <td>bytes</td>
+      <td>int</td>
+      <td>bytes</td>
+    </tr>
+  </table>
 
 3. 学习按键的`控制指令`(0x10)
-<table>
-  <tr>
-    <th>控制命令</th>
-    <th>遥控器id</th>
-    <th>按键id</th>
-  </tr>
-  <tr>
-    <td>short</td>
-    <td>byte</td>
-    <td>int</td>
-  </tr>
-</table>
+
+  <table>
+    <tr>
+      <th>控制命令</th>
+      <th>遥控器id</th>
+      <th>按键id</th>
+    </tr>
+    <tr>
+      <td>short</td>
+      <td>byte</td>
+      <td>int</td>
+    </tr>
+  </table>
 
 4. 发送红外指令(0x11)
-<table>
-  <tr>
-    <th>控制命令</th>
-    <th>红外信号的标识</th>
-  </tr>
-  <tr>
-    <td>short</td>
-    <td>int</td>
-  </tr>
-</table>
+  <table>
+    <tr>
+      <th>控制命令</th>
+      <th>红外信号的标识</th>
+    </tr>
+    <tr>
+      <td>short</td>
+      <td>int</td>
+    </tr>
+  </table>
 
-如果不通过服务器发送， 则发送红外信号int+bytes, 而不是红外信号的标识
+  如果不通过服务器发送， 则发送红外信号int+bytes, 而不是红外信号的标识
 
 #### 返回payload为
 3. 学习按键的返回
-<table>
-  <tr>
-    <th>红外信号的标识</th>
-    <th>红外信号</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>int+bytes</td>
-  </tr>
-</table>
+
+  <table>
+    <tr>
+      <th>红外信号的标识</th>
+      <th>红外信号</th>
+    </tr>
+    <tr>
+      <td>int</td>
+      <td>int+bytes</td>
+    </tr>
+  </table>
+  
 4. 空
 
 ### 关联设备(0x8c)
