@@ -98,160 +98,6 @@
 
 ## 手机->服务器
 
-### 获取手机的配置(0x80)
-<table>
-  <tr>
-    <th>震动</th>
-    <th>声音</th>
-  </tr>
-  <tr>
-    <td>bool</td>
-    <td>bool</td>
-  </tr>
-</table>
-
-### 修改房间信息(0x81)
-#### 请求payload为
-
-<table>
-  <tr>
-    <th>房间ID</th>
-    <th>房间名称</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>string</td>
-  </tr>
-</table>
-
-#### 返回payload为
-空
-
-
-### 获取房间信息(0x82)
-获取房间的设备信息，如果有红外控制器，并且为这个红外控制器创建了遥控器，也返回这些遥控器的信息
-房间信息定义为
-
-#### 请求payload为
-
-<table>
-  <tr>
-    <th>房间ID</th>
-  </tr>
-  <tr>
-    <td>int</td>
-  </tr>
-</table>
-
-#### 返回payload为
-
-<table>
-  <tr>
-    <th>房间ID</th>
-    <th>房间名称</th>
-    <th>设备信息</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>string</td>
-    <td>bytes</td>
-  </tr>
-<table>
-`设备信息`为设备数量(byte), 每个设备信息(bytes)
-每个设备信息定义为
-<table>
-  <tr>
-    <th>设备ID</th>
-    <th>设备名称</th>
-    <th>设备图片url</th>
-    <th>设备属性</th>
-  </tr>
-  <tr>
-    <td>devide_id</td>
-    <td>string</td>
-    <td>string</td>
-    <td>short</td>
-  </tr>
-</table>
-
-`设备属性` 设备属性在设备ID为不同时，含义不一样， 如果设备ID里说明是红外设备，那么bit 0表示是否有附属遥控设备
-
-如果有遥控器，则后面跟遥控器的信息
-遥控器的字段定义如下
-<table>
-   <tr>
-       <th>遥控器数量</th>
-       <th>遥控器信息</th>
-   </tr>
-   <tr>
-        <td>byte</td>
-        <td>bytes</td>
-   </tr>
-</table>
-单个遥控器的字段定义如下
-<table>
-   <tr>
-      <th>遥控器ID</th>
-      <th>遥控器类型</th>
-      <th>遥控器属性</th>
-   </tr>
-   <tr>
-      <td>byte</td>
-      <td>remote_controller_type</td>
-      <td>short</td>
-   </tr>
-</table>
-
-对于非自定义类型的遥控器，如果`遥控器属性`bit 0为1, 则接下去为学习信号的数量(byte), 学习信号的定义(bytes)
-学习信号的定义的具体格式为
-<table>
-   <tr>
-       <th>扩展键ID</th>
-       <th>扩展键信号ID</th>
-   </tr>
-   <tr>
-       <td>short</td>
-       <td>int</td>
-   </tr>
-</table>
-对于非自定义类型的遥控器，如果`遥控器属性`bit 1为1, 则接下去为扩展键的数量(byte), 扩展键的定义(bytes)
-扩展键定义的具体格式为
-<table>
-   <tr>
-       <th>扩展键ID</th>
-       <th>扩展键名称</th>
-       <th>扩展键信号ID</th>
-   </tr>
-   <tr>
-       <td>int</td>
-       <td>string</td>
-       <td>int</td>
-   </tr>
-</table>
-
-如果是自定义类型的遥控器，则当`遥控器属性`bit 0为1，则接下去为自定义类型遥控器的信息
-自定义类型遥控器的信息包括: 键的个数(byte), 键的定义.
-单个键的定义为
-<table>
-   <tr>
-       <th>键ID</th>
-       <th>键名称</th>
-       <th>键离屏幕中心点x</th>
-       <th>键离屏幕中心点y</th>
-       <th>键类型</th>
-       <th>键信号</th>
-   </tr>
-   <tr>
-       <td>int</td>
-       <td>string</td>
-       <td>int</td>
-       <td>int</td>
-       <td>short</td>
-       <td>int</td>
-   </tr>
-</table>
-`键类型`的意思是：会有各种预定义的键，比如圆的，方的，各种大小的，每个都会有个类型标识
-
 ### 获取设备信息(0x83)
 可以获取如温度等信息，这些信息需要向设备查询
 #### 请求payload为
@@ -343,146 +189,49 @@
   </tr>
 </table>
 
-#### 返回payload为
-空
 
-### 添加遥控器(0x85)
-#### 请求payload为
+3. 学习按键的`控制指令`(0x10)
 <table>
   <tr>
-    <th>设备标识</th>
-    <th>遥控器id</th>
-    <th>遥控器类型</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>byte</td>
-    <td>remote_contoller_type</td>
-  </tr>
-</table>
-#### 返回payload为
-空
-
-### 删除遥控器(0x86)
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>遥控器id</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>byte</td>
-  </tr>
-</table>
-#### 返回payload为
-空
-
-### 为特定类型遥控器添加自定义按键(0x87)
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>遥控器id</th>
-    <th>按键id</th>
-    <th>名称</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>byte</td>
-    <td>short</td>
-    <td>string</td>
-  </tr>
-</table>
-#### 返回payload为
-空
-
-### 为自定义类型遥控器添加自定义按键(0x88)
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>遥控器id</th>
-    <th>按键id</th>
-    <th>名称</th>
-    <th>键离屏幕中心点x</th>
-    <th>键离屏幕中心点y</th>
-    <th>键类型</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>byte</td>
-    <td>short</td>
-    <td>string</td>
-    <td>int</td>
-    <td>int</td>
-    <td>short</td>
-  </tr>
-</table>
-#### 返回payload为
-空
-
-### 为特定类型遥控器修改自定义按键(0x89)
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>遥控器id</th>
-    <th>按键id</th>
-    <th>名称</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>byte</td>
-    <td>short</td>
-    <td>string</td>
-  </tr>
-</table>
-#### 返回payload为
-空
-
-### 为自定义类型遥控器修改自定义按键(0x8a)
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>遥控器id</th>
-    <th>按键id</th>
-    <th>名称</th>
-    <th>键离屏幕中心点x</th>
-    <th>键离屏幕中心点y</th>
-    <th>键类型</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>byte</td>
-    <td>short</td>
-    <td>string</td>
-    <td>int</td>
-    <td>int</td>
-    <td>short</td>
-  </tr>
-</table>
-#### 返回payload为
-空
-
-### 遥控器删除自定义按键(0x8b)
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
+    <th>控制命令</th>
     <th>遥控器id</th>
     <th>按键id</th>
   </tr>
   <tr>
-    <td>int</td>
-    <td>byte</td>
     <td>short</td>
+    <td>byte</td>
+    <td>int</td>
   </tr>
 </table>
+
+4. 发送红外指令(0x11)
+<table>
+  <tr>
+    <th>控制命令</th>
+    <th>红外信号的标识</th>
+  </tr>
+  <tr>
+    <td>short</td>
+    <td>int</td>
+  </tr>
+</table>
+
+如果不通过服务器发送， 则发送红外信号int+bytes, 而不是红外信号的标识
+
 #### 返回payload为
-空
-    
+3. 学习按键的返回
+<table>
+  <tr>
+    <th>红外信号的标识</th>
+    <th>红外信号</th>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>int+bytes</td>
+  </tr>
+</table>
+4. 空
+
 ### 关联设备(0x8c)
 #### 请求payload为
 
@@ -518,88 +267,6 @@
 
 #### 返回payload为
 空
-
-### 修改设备(0x8e)
-#### 请求payload为
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>设备名称</th>
-    <th>设备图片ID</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>string</td>
-    <td>int</td>
-  </tr>
-</table>
-
-#### 返回payload为
-空
-
-### 控制设备(0x8f)
-<table>
-  <tr>
-    <th>设备标识</th>
-    <th>控制指令</th>
-  </tr>
-  <tr>
-    <td>int</td>
-    <td>bytes</td>
-  </tr>
-</table>
-
-`控制指令`的第一个字符为子控制指令标识, 剩余数据为控制指令本身
-
-1. 学习按键的`控制指令`(0x10)
-<table>
-  <tr>
-    <th>遥控器id</th>
-    <th>按键id</th>
-  </tr>
-  <tr>
-    <td>byte</td>
-    <td>int</td>
-  </tr>
-</table>
-
-2. 发送红外指令(0x11)
-<table>
-  <tr>
-    <th>红外信号的标识</th>
-  </tr>
-  <tr>
-    <td>int</td>
-  </tr>
-</table>
-
-3. 删除按键红外信号(0x12)
-<table>
-  <tr>
-    <th>遥控器id</th>
-    <th>按键id</th>
-  </tr>
-  <tr>
-    <td>byte</td>
-    <td>int</td>
-  </tr>
-</table>
-
-
-#### 返回payload为
-1. 学习按键的返回
-<table>
-  <tr>
-    <th>红外信号的标识</th>
-  </tr>
-  <tr>
-    <td>int</td>
-  </tr>
-</table>
-2. 空
-
-3. 空
-
 
 ### 注册用户(0x90)
 #### 请求payload为
