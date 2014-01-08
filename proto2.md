@@ -13,6 +13,9 @@
   * `string`      4 bytes长度字段 + string的实际数据
   * `device_id`   16 bytes 设备ID, byte 0设备的类型信息, byte 1-2为vendor编号，2-3为vendor设备型号编号, 剩下的为设备
                   实际ID
+  * `time_BCD`    时间的BCD表示2014-02-11 00:23:12 需要用7个bytes表示，byte 1 0x20, byte 2 0x14
+                  byte 3 0x02, byte 4 0x11, byte 5 0x00, byte 6 0x23, byte 7 0x12
+  * `ip`          四个字节，比如202.112.12.13 则表示为 0xCA 0x70 0x0c 0x0d
 
   第一个byte的含义如下表
   <table>
@@ -624,9 +627,22 @@ HTTP POST:
   </tr>
 </table>
 #### 返回payload为
-空
+<table>
+  <tr>
+    <th>时间</th>
+    <th>星期数</th>
+    <th>更换IP</th>
+    <th>ip地址</th>
+  </tr>
+  <tr>
+    <td>time_BCD</td>
+    <td>byte [1,7]</td>
+    <td>bool</td>
+    <td>ip, 更换ip为true时存在</td>
+  </tr>
+</table>
 
-### 设备ping(0xa1)
+### 设备心跳(0xa1)
 #### 请求payload为
 空
 #### 返回payload为
@@ -641,11 +657,22 @@ HTTP POST:
   </tr>
   <tr>
     <td>device_id</td>
-    <th>byte</td>
+    <th>bytes</td>
   </tr>
 </table>
 
-`状态`: 0标识offline, 1标识online
+`状态`: bytes, 每种设备汇报的格式都不同
+当前红外项目的`状态`具体定义为
+<table>
+  <tr>
+    <th>温度</th>
+    <th>保留字段</th>
+  </tr>
+  <tr>
+    <td>short</td>
+    <th>4 bytes</td>
+  </tr>
+</table>
 
 ### 控制返回(0xa3)
 1. 学习红外(0x10)
