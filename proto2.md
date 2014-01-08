@@ -829,12 +829,14 @@
 学习信号的定义的具体格式为
 <table>
    <tr>
-       <th>扩展键ID</th>
-       <th>扩展键信号ID</th>
+       <th>键ID</th>
+       <th>键信号ID</th>
+       <th>键信号</th>
    </tr>
    <tr>
        <td>short</td>
        <td>int</td>
+       <td>int+bytes</td>
    </tr>
 </table>
 对于非自定义类型的遥控器，如果`遥控器属性`bit 1为1, 则接下去为扩展键的数量(byte), 扩展键的定义(bytes)
@@ -844,11 +846,13 @@
        <th>扩展键ID</th>
        <th>扩展键名称</th>
        <th>扩展键信号ID</th>
+       <th>键信号</th>
    </tr>
    <tr>
        <td>int</td>
        <td>string</td>
        <td>int</td>
+       <td>int+bytes</td>
    </tr>
 </table>
 
@@ -862,6 +866,7 @@
        <th>键离屏幕中心点x</th>
        <th>键离屏幕中心点y</th>
        <th>键类型</th>
+       <th>键信号ID</th>
        <th>键信号</th>
    </tr>
    <tr>
@@ -871,12 +876,19 @@
        <td>int</td>
        <td>short</td>
        <td>int</td>
+       <td>int+bytes</td>
    </tr>
 </table>
 `键类型`的意思是：会有各种预定义的键，比如圆的，方的，各种大小的，每个都会有个类型标识
 
 #### 返回payload为
 空
+
+### 下载手机配置(0x96)
+#### 请求payload为
+空
+#### 返回payload为
+上传手机配置的请求相同
 
 ## 设备->服务器
 
