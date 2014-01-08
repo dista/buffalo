@@ -282,15 +282,30 @@
   </tr>
 </table>
 `控制信息`是一个字符串，每种设备，它的定义都不相同
+单个控制命令的通用定义为
+<table>
+  <tr>
+    <th>控制命令</th>
+    <th>控制命令参数长度</th>
+    <th>控制命令参数</th>
+  </tr>
+   <tr>
+    <td>short</td>
+    <td>int</td>
+    <td>bytes</td>
+  </tr>
+</table>
 下面定义下这个项目会用到的控制指令
 1. 锁定设备(0x01)
 <table>
     <tr>
     <th>控制命令</th>
+    <th>长度</th>
     <th>是否锁定</th>
   </tr>
   <tr>
     <td>short</td>
+    <td>int</td>
     <td>byte</td>
   </tr>
 </table>
@@ -298,11 +313,13 @@
 <table>
   <tr>
     <th>控制命令</th>
+    <th>长度</th>
     <th>组数</th>
     <th>单个命令</th>
   </tr>
   <tr>
     <td>short</td>
+    <td>int</td>
     <td>byte</td>
     <td>bytes</td>
   </tr>
