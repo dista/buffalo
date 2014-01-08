@@ -15,7 +15,8 @@
                   实际ID
   * `time_BCD`    时间的BCD表示2014-02-11 00:23:12 需要用7个bytes表示，byte 1 0x20, byte 2 0x14
                   byte 3 0x02, byte 4 0x11, byte 5 0x00, byte 6 0x23, byte 7 0x12
-  * `ip`          四个字节，比如202.112.12.13 则表示为 0xCA 0x70 0x0c 0x0d
+  * `ip`          四个字节，比如202.112.12.13 则表示为 0xCA 0x70 0x0c 0x0d ipv4
+  * `none`        表示该字段不出现， 比如int/none, 表示该字段可能是int, 也可能不出现
 
   第一个byte的含义如下表
   <table>
@@ -32,7 +33,7 @@
   * `bit X` 从左往右来规定是哪个bit, bit X表示从左往右第X位, X从0开始
   
 
-各种整形以`big-endian`进行编码
+各种整形以`big-endian` (http://en.wikipedia.org/wiki/Endianness) 进行编码
 
 
 ## 信息格式
@@ -334,12 +335,14 @@
   <tr>
     <th>是否改IP</th>
     <th>ip地址</th>
+    <th>端口号</th>
     <th>设备数量</th>
     <th>单个设备状态描述</th>
   </tr>
   <tr>
     <td>bool</td>
     <td>ip/none</td>
+    <td>int/none</td>
     <td>int</td>
     <td>bytes</td>
   </tr>
