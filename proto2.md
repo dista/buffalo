@@ -89,21 +89,25 @@
   </tr>
   <tr>
     <td>0x01</td>
-    <td>不存在</td>
+    <td>不存在 NOT_EXISTS</td>
   </tr>
   <tr>
     <td>0x02</td>
-    <td>超时</td>
+    <td>超时 TIMEOUT</td>
   </tr>
   <tr>
     <td>0x03</td>
-    <td>Server内部错误</td>
+    <td>Server内部错误 INTERNAL_ERROR</td>
   </tr>
   <tr>
     <td>0x04</td>
-    <td>已经被占用</td>
+    <td>已经被占用 USED</td>
   </tr>
 </table>
+
+系统只用这4个错误代码， 在具体命令里面含义有一些不同， 比如USED在检测邮箱的时候可以是邮箱已经被占用的意思，
+在关联设备的时候可以是设备已经被占用的意思
+`超时` 所有需要发送给设备的指令都可能会返回超时错误
 
 ## 手机->服务器
 
@@ -199,6 +203,8 @@
       <td>bytes</td>
     </tr>
   </table>
+  
+  `可能的错误返回`: USED
 
 3. 学习按键的`控制指令`(0x10)
 
@@ -261,6 +267,8 @@
   </tr>
 </table>
 
+  `可能的错误返回`: USED
+
 如果该设备是主设备,则主设备ID不需要填写; 如果是从设备,则主设备ID必须填写
 
 #### 返回payload为
@@ -293,6 +301,8 @@
     <td>string</td>
   </tr>
 </table>
+
+  `可能的错误返回`: USED
 #### 返回payload为
 空
 
@@ -310,6 +320,7 @@
     <td>string</td>
   </tr>
 </table>
+  `可能的错误返回`: NOT_FOUND
 #### 返回payload为
 空
 
@@ -323,6 +334,7 @@
     <td>string</td>
   </tr>
 </table>
+  `可能的错误返回`: NOT_FOUND
 #### 返回payload为
 空
 
@@ -381,11 +393,15 @@
   </tr>
 </table>
 
+`可能的错误返回`: NOT_FOUND
+
 ### 用户退出(0x93)
 #### 请求payload为
 空
 #### 返回payload为
 空
+
+`可能的错误返回`: NOT_FOUND
 
 ### 检查邮箱(0x94)
 #### 请求payload为
@@ -399,6 +415,8 @@
 </table>
 #### 返回payload为
 空
+
+`可能的错误返回`: USED
 
 ### 上传手机配置(0x95)
 #### 请求payload为
