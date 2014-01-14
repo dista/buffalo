@@ -305,9 +305,11 @@ SEND ALL KINDS OF MSG
   <tr>
     <td>device_id</td>
     <td>device_id/none</td>
-    <td>byte, 最高为bit为正负，剩余bits为时区值</td>
+    <td>string</td>
   </tr>
 </table>
+
+`时区`的可能取值见 https://github.com/moment/moment-timezone/blob/develop/moment-timezone.json
 
   `可能的错误返回`: USED
 
@@ -696,6 +698,7 @@ SEND ALL KINDS OF MSG
 
 ### 控制返回(0xa3)
 控制的请求格式见(0x84)
+
 1. 学习红外(0x10)
 <table>
   <tr>
@@ -710,6 +713,7 @@ SEND ALL KINDS OF MSG
 
 ### 获取设备状态返回(0xa4)
 查询的请求格式见(0x83)
+
 <table>
   <tr>
     <th>状态信息</th>
@@ -746,3 +750,33 @@ SEND ALL KINDS OF MSG
 
 ### 查询设备(0xa6)
 和手机发给服务器的一致(0x83)
+
+### 同步时间(0xa7)
+请求payload为
+空
+
+返回payload为
+<table>
+  <tr>
+    <th>时间</th>
+    <th>星期数</th>
+  </tr>
+  <tr>
+    <td>time_BCD</td>
+    <td>byte [1,7]</td>
+  </tr>
+</table>
+
+## 举例
+* 比如`同步时间(0xa7)`命令， 设备将发如下bytes给server
+  
+  ```
+  a7 00 00 00 00
+  ```
+
+  server如果处理成功，会返回
+  
+  ```
+  a7 01 00 00 00 08 20 14 01 20 11 21 22 6
+  ```
+
