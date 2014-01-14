@@ -695,6 +695,7 @@ SEND ALL KINDS OF MSG
 </table>
 
 ### 控制返回(0xa3)
+控制的请求格式见(0x84)
 1. 学习红外(0x10)
 <table>
   <tr>
@@ -708,6 +709,7 @@ SEND ALL KINDS OF MSG
 </table>
 
 ### 获取设备状态返回(0xa4)
+查询的请求格式见(0x83)
 <table>
   <tr>
     <th>状态信息</th>
