@@ -249,7 +249,7 @@ SEND ALL KINDS OF MSG
     </tr>
   </table>
   
-  `可能的错误返回`: USED
+  `可能的错误返回`: USED DEVICE
 
 3. 学习按键的`控制指令`(0x10)
 
@@ -312,7 +312,7 @@ SEND ALL KINDS OF MSG
 
 `时区`的可能取值见 https://github.com/moment/moment-timezone/blob/develop/moment-timezone.json
 
-  `可能的错误返回`: USED
+  `可能的错误返回`: USED NOT_SET
 
 如果该设备是主设备,则主设备ID不需要填写; 如果是从设备,则主设备ID必须填写
 
@@ -347,7 +347,7 @@ SEND ALL KINDS OF MSG
   </tr>
 </table>
 
-  `可能的错误返回`: USED
+  `可能的错误返回`: USED EMAIL, USED PASSWORD
 #### 返回payload为
 空
 
@@ -365,7 +365,7 @@ SEND ALL KINDS OF MSG
     <td>string</td>
   </tr>
 </table>
-  `可能的错误返回`: NOT_EXISTS
+  `可能的错误返回`: NOT_EXISTS EMAIL, NOT_EXISTS PASSWORD
 #### 返回payload为
 空
 
@@ -379,7 +379,7 @@ SEND ALL KINDS OF MSG
     <td>string</td>
   </tr>
 </table>
-  `可能的错误返回`: NOT_EXISTS
+  `可能的错误返回`: NOT_EXISTS EMAIL
 #### 返回payload为
 空
 
@@ -440,15 +440,11 @@ SEND ALL KINDS OF MSG
   </tr>
 </table>
 
-`可能的错误返回`: NOT_EXISTS
-
 ### 用户退出(0x93)
 #### 请求payload为
 空
 #### 返回payload为
 空
-
-`可能的错误返回`: NOT_EXISTS
 
 ### 检查邮箱(0x94)
 #### 请求payload为
@@ -463,7 +459,7 @@ SEND ALL KINDS OF MSG
 #### 返回payload为
 空
 
-`可能的错误返回`: USED
+`可能的错误返回`: USED EMAIL
 
 ### 上传手机配置(0x95)
 #### 请求payload为
