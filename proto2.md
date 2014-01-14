@@ -8,18 +8,23 @@
 各种其它信息为附属信息，比如此项目要用到的房间等信息，整个这些信息看作是一个统一的配置来看待
 
 ## 控制模式
-主要有2种： 一种是终端直接和设备进行通信，另外一种是终端和设备通过服务器进行交互
-这2种模式下面发的信息格式是一致的
+主要有2种： 
+ * 一种是终端直接和设备进行通信 (方式1)
+ * 另外一种是终端和设备通过服务器进行交互 (方式2)
+
+下面定义的都是通过服务器交互的数据格式，即2的格式。
+对于1， 需要把2格式里面`类型` - 0x40, 比如对于2格式里面的获取设备信息(0x83)的请求，1里面就为0x43,
+而`payload`是完全一致的
 
 ## 数据类型及名词解释
 
   * `byte`        1 byte
   * `short`       2 bytes
-  * `bool`        1 byte, 0为否，1为是
+  * `bool`        1 byte, 0为否，1为是, 比如是否锁定， 1表示锁定，0表示不锁定
   * `int`         4 bytes
   * `bytes`       n bytes
   * `string`      4 bytes长度字段 + string的实际数据
-  * `device_id`   16 bytes 设备ID, byte 0设备的类型信息, byte 1-2为vendor编号，2-3为vendor设备型号编号, 剩下的为设备
+  * `device_id`   16 bytes 设备ID, byte 0设备的类型信息, byte 1-2为vendor编号，3-4为vendor设备型号编号, 剩下的为设备
                   实际ID
   * `time_BCD`    时间的BCD表示2014-02-11 00:23:12 需要用7个bytes表示，byte 1 0x20, byte 2 0x14
                   byte 3 0x02, byte 4 0x11, byte 5 0x00, byte 6 0x23, byte 7 0x12
@@ -38,6 +43,7 @@
   </tr>
   </table>
   * `remote_contoller_type` short 如果是0,则是自定义遥控器,否则为特定型号的遥控器
+                            各种特定型号遥控器定义为: 1表示电视机、2表示机顶盒、3表示DVD、4表示空调、5表示IPTV
   * `bit X` 从左往右来规定是哪个bit, bit X表示从左往右第X位, X从0开始
   
 
@@ -77,7 +83,9 @@
 ## 失败返回payload
 所有失败返回的格式都为
 <table>
-  <tr><th>失败码</th></tr>
+  <tr><th>错误码</th></tr>
+  <tr><td>int</td></tr>
+  <tr><th>错误对象</th></tr>
   <tr><td>int</td></tr>
 </table>
 
@@ -105,18 +113,45 @@
   </tr>
 </table>
 
+可能的`错误对象`有
+<table>
+  <tr>
+    <th>错误对象</th>
+    <th>含义</th>
+  </tr>
+  <tr>
+    <td>0x00</td>
+    <td>未指定对象</td>
+  </tr>
+  <tr>
+    <td>0x01</td>
+    <td>邮箱</td>
+  </tr>
+  <tr>
+    <td>0x02</td>
+    <td>密码</td>
+  </tr>
+  <tr>
+    <td>0x03</td>
+    <td>设备</td>
+  </tr>
+</table>
+
  * 系统只用这4个错误代码， 在具体命令里面含义有一些不同， 比如USED在检测邮箱的时候可以是邮箱已经被占用的意思，
 在关联设备的时候可以是设备已经被占用的意思
  * 我们假设有些错误情况在正常使用的时候是不会发生的， 比如解除设备时设备ID不存在。 协议就不会规定这样的错误
  * `超时` 所有需要发送给设备的指令都可能会返回该错误
  * `不存在` 所有需要发送给设备的指令都可能会返回该错误
  * 如果这个命令需要登录再发送，但是你没有登录，会返回NOT_EXISTS
+ * 需要将错误码和错误对象结合起来看， 如果错误对象为0x00, 则只需要看错误码
 
 ## 协议交互
 ### 手机到服务器
 -->LOGIN-->(SEND ALL KINDS OF MSG)-->LOGOUT
 ### 设备到服务器
 -->LOGIN-->(SEND ALL KINDS OF MSG)
+### 手机和设备直连
+SEND ALL KINDS OF MSG
 
 ## 手机->服务器
 
@@ -134,7 +169,7 @@
 </table>
 
 #### 返回payload为
-返回格式见下面设备的返回
+返回格式见下面设备的返回(0xa4)
 
 ### 控制设备(0x84)
 #### 请求payload为
@@ -220,12 +255,10 @@
   <table>
     <tr>
       <th>控制命令</th>
-      <th>遥控器id</th>
-      <th>按键id</th>
+      <th>长度</th>
     </tr>
     <tr>
       <td>short</td>
-      <td>byte</td>
       <td>int</td>
     </tr>
   </table>
@@ -234,15 +267,15 @@
   <table>
     <tr>
       <th>控制命令</th>
-      <th>红外信号的标识</th>
+      <th>长度</th>
+      <th>红外信号</th>
     </tr>
     <tr>
       <td>short</td>
       <td>int</td>
+      <td>bytes</td>
     </tr>
   </table>
-
-  如果不通过服务器发送， 则发送红外信号int+bytes, 而不是红外信号的标识
 
 #### 返回payload为
 3. 学习按键的返回
@@ -329,7 +362,7 @@
     <td>string</td>
   </tr>
 </table>
-  `可能的错误返回`: NOT_FOUND
+  `可能的错误返回`: NOT_EXISTS
 #### 返回payload为
 空
 
@@ -343,7 +376,7 @@
     <td>string</td>
   </tr>
 </table>
-  `可能的错误返回`: NOT_FOUND
+  `可能的错误返回`: NOT_EXISTS
 #### 返回payload为
 空
 
@@ -395,14 +428,16 @@
   <tr>
     <th>温度</th>
     <th>是否锁定</th>
+    <th>以后扩充字段</th>
   </tr>
   <tr>
     <td>short</td>
     <td>bool</td>
+    <td>int</td>
   </tr>
 </table>
 
-`可能的错误返回`: NOT_FOUND
+`可能的错误返回`: NOT_EXISTS
 
 ### 用户退出(0x93)
 #### 请求payload为
@@ -410,7 +445,7 @@
 #### 返回payload为
 空
 
-`可能的错误返回`: NOT_FOUND
+`可能的错误返回`: NOT_EXISTS
 
 ### 检查邮箱(0x94)
 #### 请求payload为
@@ -705,7 +740,7 @@
 </table>
 
 ### 控制设备(0xa5)
-和手机发给服务器的一致
+和手机发给服务器的一致(0x84)
 
 ### 查询设备(0xa6)
-和手机发给服务器的一致
+和手机发给服务器的一致(0x83)
