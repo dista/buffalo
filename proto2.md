@@ -737,7 +737,7 @@ SEND ALL KINDS OF MSG
     <th>值(value)</th>
   </tr>
   <tr>
-    <td>temperature</td>
+    <td>Temp</td>
     <td>30(short)</td>
   </tr>
 </table>
