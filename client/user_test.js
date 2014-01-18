@@ -1,10 +1,11 @@
 var net = require("net");
 var util = require("../util.js");
 var port = 6000;
-var ip = "115.29.164.141"
+var ip = "127.0.0.1"
 
 var phone_test = function(name, device){
 var phone_client = net.connect(port, ip, function(){
+    console.log(device);
     //send_check_name("dista");
     //send_check_email("dista@qq.com");
     /*
@@ -14,8 +15,9 @@ var phone_client = net.connect(port, ip, function(){
     */
     //send_register("dista90", "dista90@qq.com", "654321");
     //console.log(new Date());
+    //send_register(name, name + "@qq.com", "654321");
     send_login(name, "654321");
-    //setTimeout(function(){send_asso(name, device, "myss1id");}, 1000);
+    //setTimeout(function(){send_asso(name, device, "myss1id", "Asia/Hong_Kong");}, 1000);
     //setTimeout(function(){send_query_all();}, 1000);
     //setTimeout(function(){send_change_password("654321");}, 1000);
     //setTimeout(function(){send_logout();}, 1000);
@@ -40,11 +42,12 @@ var phone_client = net.connect(port, ip, function(){
 
     phone_client.on('data', function(data){
         if(data[1] == 0x11){
+            setTimeout(function(){send_asso(name, device, "myss1id", "Asia/Hong_Kong");}, 1000);
             //setInterval(function(){send_control(device, 1, 20);}, 2000);
             //setInterval(function(){send_query_status(device);}, 3000);
             //send_del_delay(device);
             //setInterval(function(){send_del_time(device, 1);}, 5000);
-            send_del_time(device, 1);
+            //send_del_time(device, 1);
         }
 
         //console.log(new Date());
@@ -182,15 +185,17 @@ var send_login = function(name, password)
     phone_client.write(buff);
 }
 
-var send_asso = function(name, device_id, ssid)
+var send_asso = function(name, device_id, ssid, timezone)
 {
-    var buff = new Buffer(10 + 8 + name.length + 1 + 12 + ssid.length + 1);
+    var buff = new Buffer(10 + 8 + name.length + 1 + 12 + ssid.length + 1 + timezone.length + 1 + 1);
     util.setCommonPart(buff, {"type": 0x14, "packet_id": 1});
     (new Buffer(name)).copy(buff, 16);
     buff[16 + name.length] = 0x27;
     (new Buffer(device_id)).copy(buff, 16 + name.length + 1);
     (new Buffer(ssid)).copy(buff, 16 + name.length + 1 + 12);
     buff[16 + name.length + 1 + 12 + ssid.length] = 0x27;
+    (new Buffer(timezone)).copy(buff, 16 + name.length + 1 + 12 + ssid.length + 1);
+    buff[16 + name.length + 1 + 12 + ssid.length + 1 + timezone.length] = 0x27;
 
     util.setChecksum(buff);
 
@@ -247,6 +252,6 @@ var send_check_email = function(name){
 }
 }
 
-for(var i = 0 ; i < 1; i++){
+for(var i = 90 ; i < 91; i++){
     phone_test("dista" + i, "RELEASE1" + util.formatNumber(2000+i, 4));
 }

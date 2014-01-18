@@ -1,4 +1,5 @@
 var assert = require('assert');
+var moment = require('moment-timezone');
 
 int2BCD = function(d)
 {
@@ -15,16 +16,33 @@ int2BCD = function(d)
     return out;
 }
 
-exports.getTimeBCD = function()
+var getDateByTimezone = function(timezone)
 {
-    var d = new Date();
+    var d = moment();
+
+    if(timezone){
+        try{
+            d = moment().tz(timezone);
+        }
+        catch(err){
+            console.log('invalid timezone' + timezone);
+        }
+    }
+
+    return d;
+}
+
+exports.getTimeBCD = function(timezone)
+{
+    var d = getDateByTimezone(timezone);
+
     var r = new Buffer(6);
-    r[0] = d.getFullYear() - 2000;
-    r[1] = d.getMonth() + 1;
-    r[2] = d.getDate();
-    r[3] = d.getHours();
-    r[4] = d.getMinutes();
-    r[5] = d.getSeconds();
+    r[0] = d.year() - 2000;
+    r[1] = d.month() + 1;
+    r[2] = d.date();
+    r[3] = d.hour();
+    r[4] = d.minute();
+    r[5] = d.second();
 
     for(var i = 0; i < r.length; i++)
     {
@@ -34,9 +52,9 @@ exports.getTimeBCD = function()
     return r;
 }
 
-exports.getWeek = function()
+exports.getWeek = function(timezone)
 {
-    var r = (new Date()).getDay();
+    var r = (getDateByTimezone(timezone)).day();
     
     if(r == 0)
     {

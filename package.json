@@ -5,6 +5,7 @@
         "posix": "1.0.x",
         "emailjs": "0.3.x",
         "sqlite3": "2.1.x",
-        "mysql": "2.0.x"
+        "mysql": "2.0.x",
+        "moment-timezone": "*"
     }
 }

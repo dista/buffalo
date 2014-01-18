@@ -258,6 +258,7 @@ exports.create_phone = function(c, one_step_cb) {
         var proto_asso = function(data, start, msg, len){
             var name_pos = [];
             var ssid_pos = [];
+            var timezone_pos = [];
             var device_id;
 
             name_pos[0] = start + 16;
@@ -274,16 +275,25 @@ exports.create_phone = function(c, one_step_cb) {
                         i += 1 + 12;
                         continue;
                     }
-                    else{
-                        ssid_pos[1] = i;
+                    else if(ssid_pos.length == 0){
+                        ssid_pos[0] = i + 1;
+
                         break;
+                    }
+                    else if(ssid_pos.length == 1)
+                    {
+                        ssid_pos[1] = i;
+                        timezone_pos[0] = i+1;
+                    }
+                    else{
+                        timezone_pos[1] = i;
                     }
                 }
 
                 i++;
             }
 
-            if(name_pos.length != 2 || ssid_pos.length != 2)
+            if(name_pos.length != 2 || ssid_pos.length != 2 || timezone_pos.length != 2)
             {
                 handle_protocal_error();
                 return;
@@ -291,6 +301,7 @@ exports.create_phone = function(c, one_step_cb) {
 
             var name = data.toString('ascii', name_pos[0], name_pos[1]);
             var ssid = data.toString('ascii', ssid_pos[0], ssid_pos[1]);
+            var timezone = data.toString('ascii', timezone_pos[0], timezone_pos[1]);
             var device;
 
             var user = null;
@@ -338,6 +349,12 @@ exports.create_phone = function(c, one_step_cb) {
                 }
 
                 device = row;
+                db.set_timezone(timezone, row.id);
+                var embed = embed_device.find_by_device_id(row.device_id);
+                if(embed){
+                    // let device reconnect
+                    embed.end();
+                }
                 db.get_user_device(row.id, get_user_device_cb);
             }
 

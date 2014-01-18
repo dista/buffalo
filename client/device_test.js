@@ -2,7 +2,7 @@ var net = require("net");
 var util = require("../util.js");
 var port = 6000;
 var posix = require('posix');
-var ip = "115.29.164.141"
+var ip = "127.0.0.1"
 
 var device_test = function(device_id){
     var device_client = net.connect(port, ip, function(){
@@ -158,7 +158,7 @@ var device_test = function(device_id){
 }
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
-for(var i = 2000; i < 2001; i++)
+for(var i = 2090; i < 2091; i++)
 {
     device_test("RELEASE1" + util.formatNumber(i, 4));
 }

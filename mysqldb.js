@@ -29,7 +29,7 @@ function connect_with_reconnect_enable(){
 
         /*
         db.query('use ' + dbname, function(){
-            for(var i = 5002; i <= 20000; i++){
+            for(var i = 0; i <= 5000; i++){
                 db.query('INSERT INTO device (device_id, ssid) VALUES (?, ?)', ["RELEASE1" + util.formatNumber(i, 4), util.formatNumber(i, 4)]);
                 console.log(i);
             }
@@ -54,7 +54,7 @@ function connect_with_reconnect_enable(){
                 db.query('CREATE INDEX name_pass_index ON user(name, password)', function(){
                 db.query('CREATE INDEX email_pass_index ON user(email, password)', function(){
                 db.query('CREATE TABLE device (id INT PRIMARY KEY AUTO_INCREMENT, device_id VARCHAR(16) UNIQUE NOT NULL, ssid VARCHAR(32), mac VARCHAR(32), state TINYINT DEFAULT 0, temperature TINYINT DEFAULT 0,' +
-                       'humidity TINYINT DEFAULT 0, battery SMALLINT DEFAULT 0, locked TINYINT DEFAULT 0, online TINYINT DEFAULT 0, last_login DATETIME, login_times INT DEFAULT 0)', function(){
+                       'humidity TINYINT DEFAULT 0, battery SMALLINT DEFAULT 0, locked TINYINT DEFAULT 0, online TINYINT DEFAULT 0, last_login DATETIME, login_times INT DEFAULT 0, timezone VARCHAR(32))', function(){
                 db.query('CREATE INDEX device_id_index ON device(device_id)', function(){
                 db.query('CREATE TABLE user_device(user_id INT, device_id INT)', function(){
                 db.query('CREATE INDEX user_id_index on user_device(user_id)', function(){
@@ -344,6 +344,10 @@ exports.set_offline = function(id, cb){
 
 exports.set_online = function(id){
     query_wrapper("UPDATE device set online=1 WHERE id=?", [id]);
+}
+
+exports.set_timezone = function(timezone, id){
+    query_wrapper("UPDATE device set timezone=? WHERE id=?", [timezone, id]);
 }
 
 exports.set_all_offline = function(cb){

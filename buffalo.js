@@ -3,7 +3,7 @@ var embed_device = require('./embed_device.js');
 var phone = require('./phone.js');
 var posix = require('posix');
 var cluster = require('cluster');
-var port = 6000;
+var port = 7000;
 
 function handleClient(c)
 {
@@ -130,6 +130,7 @@ function handleClient(c)
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
 var numCPUs = require('os').cpus().length;
+numCPUs = 1;
 if(cluster.isMaster){
     var after_init = function(err){
         if(err){
@@ -195,7 +196,13 @@ if(cluster.isMaster){
         });
 
         cluster.on('exit', function(worker, code, signal) {
-            send_worker_exit_msg(worker);
+            console.log("EXIT.....");
+                    Object.keys(cluster.workers).forEach(function(id){
+                        if(cluster.workers[id].id != new_worker.id){
+                            cluster.workers[id].kill(); 
+                        }
+                    });
+            //send_worker_exit_msg(worker);
 
             var restart_worker = function(){
                 console.log('worker [' + worker.id + '][' + worker.process.pid + '] died, restarting...');
@@ -204,7 +211,7 @@ if(cluster.isMaster){
                 new_worker.old_id = worker.id;
             }
 
-            restart_worker();
+            //restart_worker();
         });
     }
 

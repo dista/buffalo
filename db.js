@@ -28,7 +28,7 @@ var db = new sqlite3.Database(db_file, function(err){
                 db.run('CREATE INDEX name_pass_index ON user(name, password)');
                 db.run('CREATE INDEX email_pass_index ON user(email, password)');
                 db.run('CREATE TABLE device (id INTEGER PRIMARY KEY AUTOINCREMENT, device_id TEXT UNIQUE NOT NULL, ssid TEXT, mac TEXT, state TINYINT DEFAULT 0, temperature TINYINT DEFAULT 0,' +
-                       'humidity TINYINT DEFAULT 0, battery SMALLINT DEFAULT 0, locked TINYINT DEFAULT 0, online TINYINT DEFAULT 0, last_login DATETIME, login_times INT DEFAULT 0)');
+                       'humidity TINYINT DEFAULT 0, battery SMALLINT DEFAULT 0, locked TINYINT DEFAULT 0, online TINYINT DEFAULT 0, last_login DATETIME, login_times INT DEFAULT 0, timezone TEXT)');
                 db.run('CREATE INDEX device_id_index ON device(device_id)');
                 db.run('CREATE TABLE user_device(user_id INTEGER, device_id INTEGER)');
                 db.run('CREATE INDEX user_id_index on user_device(user_id)');
@@ -234,6 +234,10 @@ exports.set_offline = function(id, cb){
 
 exports.set_online = function(id){
     db.run("UPDATE device set online=1 WHERE id=?", id);
+}
+
+exports.set_timezone = function(timezone, id){
+    db.run("UPDATE device set timezone=? WHERE id=?", timezone, id);
 }
 
 exports.set_all_offline = function(cb){

@@ -32,7 +32,9 @@ var build_general_msg_cluster = function(msg, type, result, code){
     ret["to"] = "device";
     ret["type"] = type;
     ret["server_id"] = msg["from"];
-    ret["cb_id"] = msg["cb_id"];
+    if("cb_id" in msg){
+        ret["cb_id"] = msg["cb_id"];
+    }
     ret["proxy_id"] = msg["proxy_id"];
     ret["device_id"] = msg["device_id"];
     ret["data"] = {};
@@ -74,6 +76,7 @@ exports.notify_msg = function(msg){
                || type == "lock"
                || type == "del_delay"
                || type == "query"
+               || type == "end"
         ){
             var general_cb = function(result, code){
                 send_general_msg_cluster(msg, type + "_cb", result, code);
@@ -99,6 +102,12 @@ exports.notify_msg = function(msg){
             else{
                 if(type == "del_time"){
                     device.del_time(msg["data"]["time_id"], general_cb);
+                }
+                else if(type == "end")
+                {
+                    device.end();
+                    var ret = build_general_msg_cluster(msg, type + "_cb", 1, 0);
+                    send_msg_to_master(ret);
                 }
                 else if(type == "control")
                 {
@@ -421,6 +430,10 @@ exports.create_embed_device = function(c, one_step_cb) {
             this.general_control(0x41, buff, cb);
         }
 
+        this.end = function(){
+            self.sock.end();
+        }
+
         this.handle_end = function()
         {
             remove_embed_device();
@@ -566,9 +579,9 @@ exports.create_embed_device = function(c, one_step_cb) {
                     buff[8] = 0x01;
                     self.user_id = ++user_id_count;
                     buff.writeUInt32BE(self.user_id, 10);
-                    var dateBCD = util.getTimeBCD();
+                    var dateBCD = util.getTimeBCD(self.device.timezone);
                     dateBCD.copy(buff, 14);
-                    buff[20] = util.getWeek();
+                    buff[20] = util.getWeek(self.device.timezone);
                     
                     var index = 21;
                     buff[index++] = rows.length;
@@ -627,9 +640,9 @@ exports.create_embed_device = function(c, one_step_cb) {
         var proto_sync_time = function(data, start, msg, len){
             var buff = new Buffer(10 + 7);
             util.setCommonPart(buff, msg);
-            var dateBCD = util.getTimeBCD();
+            var dateBCD = util.getTimeBCD(self.device.timezone);
             dateBCD.copy(buff, 8);
-            buff[8 + 6] = util.getWeek();
+            buff[8 + 6] = util.getWeek(self.device.timezone);
             util.setChecksum(buff);
             
             write_data(buff);
@@ -753,6 +766,13 @@ var cluster_device = function(server_id, proxy_id, device_id, device){
         msg["data"]["time_id"] = time_id;
         msg["type"] = "del_time";
         this.send_to_server(msg, cb);
+    }
+
+    this.end = function(){
+        var msg = {};
+        msg["data"] = {};
+        msg["type"] = "end";
+        this.send_to_server(msg);
     }
 
     this.general_cb = function(msg){
