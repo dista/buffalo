@@ -995,6 +995,20 @@ exports.create_phone = function(c, one_step_cb) {
                                               ctx["end_time"],
                                               ctx["repeatx"],
                                               on_add_or_update_time);
+                        /*
+                        if((ctx["repeatx"] & 0x80) == 0){
+                            db.add_or_update_time(is_update, 
+                                                  embed.device.id,
+                                                  ctx["sid"],
+                                                  ctx["start_time"],
+                                                  ctx["end_time"],
+                                                  ctx["repeatx"],
+                                                  on_add_or_update_time);
+                        }
+                        else{
+                            on_add_or_update_time(false);
+                        }
+                        */
                     }
 
                     var on_upload_time = function(result, code){

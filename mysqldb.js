@@ -17,6 +17,15 @@ var die = function(msg, err){
     process.exit(1);
 }
 
+var get_num_str = function(i, j, k, w){
+    var codes = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                 "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+                 "U", "V", "W", "X", "Y", "Z"
+                 ];
+
+    return codes[i] + codes[j] + codes[k] + codes[w];
+}
+
 function connect_with_reconnect_enable(){
     db = mysql.createConnection(db_config);
 
@@ -26,12 +35,19 @@ function connect_with_reconnect_enable(){
             setTimeout(handle_disconnect, 2000);
             return;
         }
-
-        /*
+/*
         db.query('use ' + dbname, function(){
-            for(var i = 0; i <= 5000; i++){
-                db.query('INSERT INTO device (device_id, ssid) VALUES (?, ?)', ["RELEASE1" + util.formatNumber(i, 4), util.formatNumber(i, 4)]);
-                console.log(i);
+            var end = 26;
+            for(var i = 0; i < end; i++){
+                for(var j = 0; j < end; j++){
+                    for(var k = 0; k < end; k++){
+                        for(var w = 0; w < end; w++){
+                            var id = get_num_str(i, j, k, w);
+                            console.log(id);
+                            db.query('INSERT INTO device (device_id, ssid) VALUES (?, ?)', ["RELEASE1" + id, id]);
+                        }
+                    }
+                }
             }
         });
         */
@@ -59,7 +75,7 @@ function connect_with_reconnect_enable(){
                 db.query('CREATE TABLE user_device(user_id INT, device_id INT)', function(){
                 db.query('CREATE INDEX user_id_index on user_device(user_id)', function(){
                 db.query('CREATE UNIQUE INDEX user_device_index on user_device(user_id, device_id)', function(){
-                db.query('CREATE TABLE IF NOT EXISTS time (sid TINYINT, start_time INT, end_time INT, repeatx TINYINT, device_id INT,'+
+                db.query('CREATE TABLE IF NOT EXISTS time (sid TINYINT UNSIGNED, start_time INT, end_time INT, repeatx TINYINT UNSIGNED, device_id INT,'+
                        ' FOREIGN KEY(device_id) REFERENCES device(id))', function(){
                 db.query('CREATE UNIQUE INDEX sid_index ON time(sid, device_id)', function(){
                 // last
@@ -351,7 +367,7 @@ exports.set_timezone = function(timezone, id){
 }
 
 exports.set_all_offline = function(cb){
-    query_wrapper("UPDATE device set online=0", cb);
+    query_wrapper("UPDATE device set online=0 where online=1", cb);
 }
 
 exports.set_locked = function(id, locked){

@@ -130,7 +130,7 @@ function handleClient(c)
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
 var numCPUs = require('os').cpus().length;
-numCPUs = 1;
+numCPUs = 2;
 if(cluster.isMaster){
     var after_init = function(err){
         if(err){
