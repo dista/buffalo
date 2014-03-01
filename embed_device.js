@@ -781,7 +781,6 @@ var cluster_device = function(server_id, proxy_id, device_id, device){
         if(cb){
             cb["is_handled"] = true;
             delete pending_cbs[msg["cb_id"]];
-            return;
         }
 
         cb["cb"](msg["data"]["result"], msg["data"]["code"]);
@@ -816,7 +815,6 @@ var cluster_device = function(server_id, proxy_id, device_id, device){
         if(cb){
             cb["is_handled"] = true;
             delete pending_cbs[msg["cb_id"]];
-            return;
         }
 
         cb["cb"](msg["data"]["result"], msg["data"]["code"],
