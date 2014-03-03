@@ -378,6 +378,22 @@ exports.set_ssid = function(id, ssid){
     query_wrapper("UPDATE device set ssid=? WHERE id=?", [ssid, id]);
 }
 
+exports.delete_time_by_id_bits = function(id, sid_bits){
+    var in_statement = "(";
+    for(var i = 0; i < 10; i++){
+        if(sid_bits & (1 << i)){
+            in_statement += (i + 1);
+            in_statement += ",";
+        }
+    }
+
+    in_statement = in_statement.substring(0, in_statement.length - 1);
+
+    in_statement += ")";
+
+    query_wrapper("DELETE FROM time where sid in " + in_statement + " and device_id=?", [id]);
+}
+
 exports.add_or_update_time = function(is_update, device_id, sid, start_time, end_time, repeatx, cb){
     if(is_update){
         query_wrapper("UPDATE time SET start_time=?, end_time=?, repeatx=? WHERE sid=? and device_id=?", [start_time, end_time, repeatx, sid, device_id], cb);

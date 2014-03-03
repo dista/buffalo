@@ -655,7 +655,11 @@ exports.create_embed_device = function(c, one_step_cb) {
             var temperature = data[start + 12 + 12 + 1];
             var humidity = data[start + 12 + 12 + 2];
             var battery = data.readUInt16BE(start + 12 + 12 + 3);
+
             var locked = data[start + 12 + 12 + 5]; 
+
+            var time_finished = data.readUInt16BE(start + 12 + 12 + 1);
+            time_finished = time_finished & ((1 << 10) - 1);   
 
             var set_device_status_cb = function(err){
                 if(err)
@@ -664,6 +668,10 @@ exports.create_embed_device = function(c, one_step_cb) {
                 }
                 else{
                     write_data(util.buildGeneralOk(msg));
+                }
+
+                if(time_finished != 0){
+                    db.delete_time_by_id_bits(self.device.id, time_finished);
                 }
 
                 self.one_step_cb(util.getNextMsgPos(start, len) - start);
