@@ -613,6 +613,8 @@ exports.create_embed_device = function(c, one_step_cb) {
                 }
 
                 if(!row){
+                    console.log('xxxxxxxxxxx');
+                    console.log(self.device_id);
                     write_data(util.buildErr(msg, error_code.DEVICE_ID_NOT_FOUND));
                     self.one_step_cb(util.getNextMsgPos(start, len) - start);
                     return

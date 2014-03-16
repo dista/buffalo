@@ -52,6 +52,12 @@ function connect_with_reconnect_enable(){
         });
         */
 
+        /*
+        for(var i = 0; i < 5000; i++){
+            db.query('INSERT INTO device (device_id, ssid) VALUES (?, ?)', ["RELEASE1" + util.formatNumber(i, 4), util.formatNumber(i, 4)]);
+        }
+        */
+
         db.query("show databases", function(err, rows){
             var has_db = false;
             for(var i = 0; i < rows.length; i++){

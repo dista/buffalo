@@ -8,11 +8,9 @@ var device_test = function(device_id){
     var device_client = net.connect(port, ip, function(){
         //send_heartbeat();
         send_login(device_id, new Buffer([0x11, 0x22, 0x33, 0x44, 0x55, 0x66]));
-        /*
         setInterval(function(){
-            send_heartbeat();
+            send_heartbeat(device_id);
         }, 50000);
-        */
         //setTimeout(function(){send_status(device_id, 1, 123, 124, 129, 1);}, 500);
         //setTimeout(function(){send_sync_time(device_id);}, 500);
 
@@ -105,9 +103,10 @@ var device_test = function(device_id){
         }
     }
 
-    var send_heartbeat = function(){
+    var send_heartbeat = function(device_id){
         var buff = new Buffer(10 + 16);
         util.setCommonPart(buff, {"type": 0x30, "packet_id": 1});
+        (new Buffer(device_id)).copy(buff, 12);
         util.setChecksum(buff);
 
         console.log(buff);
@@ -158,7 +157,7 @@ var device_test = function(device_id){
 }
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
-for(var i = 2090; i < 2091; i++)
+for(var i = 0; i < 5000; i++)
 {
     device_test("RELEASE1" + util.formatNumber(i, 4));
 }

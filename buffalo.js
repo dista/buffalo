@@ -3,7 +3,7 @@ var embed_device = require('./embed_device.js');
 var phone = require('./phone.js');
 var posix = require('posix');
 var cluster = require('cluster');
-var port = 7000;
+var port = 6000;
 
 function handleClient(c)
 {
@@ -130,7 +130,6 @@ function handleClient(c)
 posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
 var numCPUs = require('os').cpus().length;
-numCPUs = 2;
 if(cluster.isMaster){
     var after_init = function(err){
         if(err){

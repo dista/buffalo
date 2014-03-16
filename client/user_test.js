@@ -1,11 +1,12 @@
 var net = require("net");
 var util = require("../util.js");
 var port = 6000;
+var posix = require('posix');
 var ip = "127.0.0.1"
 
 var phone_test = function(name, device){
 var phone_client = net.connect(port, ip, function(){
-    console.log(device);
+    //console.log(device);
     //send_check_name("dista");
     //send_check_email("dista@qq.com");
     /*
@@ -251,7 +252,8 @@ var send_check_email = function(name){
     phone_client.write(buff);
 }
 }
+posix.setrlimit('nofile', {'soft': 10000, 'hard': 10000});
 
-for(var i = 90 ; i < 91; i++){
-    phone_test("dista" + i, "RELEASE1" + util.formatNumber(2000+i, 4));
+for(var i = 0 ; i < 5000; i++){
+    phone_test("dista" + i, "RELEASE1" + util.formatNumber(i, 4));
 }
