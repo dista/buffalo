@@ -225,3 +225,30 @@ exports.formatBuffer = function(buff, len){
 
     return ret;
 }
+
+var formatNumber = function(num, len){
+    var ret = "" + num;
+
+    while(ret.length < len){
+        ret = "0" + ret;
+    }
+
+    return ret.slice(0, len);
+}
+
+exports.createDeviceId = function(n){
+    var deviceId = new Buffer(16);
+    deviceId.fill(0);
+    if(n % 2){ 
+        deviceId[0] = 0x01;
+    }   
+    else{
+        deviceId[0] = 0x81;
+    }   
+
+    var n = formatNumber(n); 
+    var nBuffer = new Buffer(n);
+    nBuffer.copy(deviceId, 16 - nBuffer.length);
+
+    return deviceId;
+}
